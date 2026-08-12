@@ -10,10 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DocsRouteImport } from './routes/docs'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as TrustRouteImport } from './routes/trust'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ContractIdRouteImport } from './routes/contract.$id'
@@ -21,6 +25,21 @@ import { Route as ContractIdRouteImport } from './routes/contract.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -43,6 +62,11 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrustRoute = TrustRouteImport.update({
+  id: '/trust',
+  path: '/trust',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/blog/',
   path: '/blog/',
@@ -61,20 +85,28 @@ const ContractIdRoute = ContractIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/docs': typeof DocsRoute
   '/pricing': typeof PricingRoute
   '/products': typeof ProductsRoute
   '/resources': typeof ResourcesRoute
   '/search': typeof SearchRoute
+  '/trust': typeof TrustRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/docs': typeof DocsRoute
   '/pricing': typeof PricingRoute
   '/products': typeof ProductsRoute
   '/resources': typeof ResourcesRoute
   '/search': typeof SearchRoute
+  '/trust': typeof TrustRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
   '/blog': typeof BlogIndexRoute
@@ -82,10 +114,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/docs': typeof DocsRoute
   '/pricing': typeof PricingRoute
   '/products': typeof ProductsRoute
   '/resources': typeof ResourcesRoute
   '/search': typeof SearchRoute
+  '/trust': typeof TrustRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
   '/blog/': typeof BlogIndexRoute
@@ -94,30 +130,42 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
+    | '/contact'
+    | '/docs'
     | '/pricing'
     | '/products'
     | '/resources'
     | '/search'
+    | '/trust'
     | '/blog/$slug'
     | '/contract/$id'
     | '/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
+    | '/contact'
+    | '/docs'
     | '/pricing'
     | '/products'
     | '/resources'
     | '/search'
+    | '/trust'
     | '/blog/$slug'
     | '/contract/$id'
     | '/blog'
   id:
     | '__root__'
     | '/'
+    | '/about'
+    | '/contact'
+    | '/docs'
     | '/pricing'
     | '/products'
     | '/resources'
     | '/search'
+    | '/trust'
     | '/blog/$slug'
     | '/contract/$id'
     | '/blog/'
@@ -125,10 +173,14 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  ContactRoute: typeof ContactRoute
+  DocsRoute: typeof DocsRoute
   PricingRoute: typeof PricingRoute
   ProductsRoute: typeof ProductsRoute
   ResourcesRoute: typeof ResourcesRoute
   SearchRoute: typeof SearchRoute
+  TrustRoute: typeof TrustRoute
   BlogSlugRoute: typeof BlogSlugRoute
   ContractIdRoute: typeof ContractIdRoute
   BlogIndexRoute: typeof BlogIndexRoute
@@ -141,6 +193,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -171,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trust': {
+      id: '/trust'
+      path: '/trust'
+      fullPath: '/trust'
+      preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/': {
       id: '/blog/'
       path: '/blog'
@@ -197,10 +277,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  ContactRoute: ContactRoute,
+  DocsRoute: DocsRoute,
   PricingRoute: PricingRoute,
   ProductsRoute: ProductsRoute,
   ResourcesRoute: ResourcesRoute,
   SearchRoute: SearchRoute,
+  TrustRoute: TrustRoute,
   BlogSlugRoute: BlogSlugRoute,
   ContractIdRoute: ContractIdRoute,
   BlogIndexRoute: BlogIndexRoute,
