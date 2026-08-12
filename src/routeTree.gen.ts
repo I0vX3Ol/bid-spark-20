@@ -14,6 +14,8 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ContractIdRouteImport } from './routes/contract.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +43,16 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContractIdRoute = ContractIdRouteImport.update({
   id: '/contract/$id',
   path: '/contract/$id',
@@ -53,7 +65,9 @@ export interface FileRoutesByFullPath {
   '/products': typeof ProductsRoute
   '/resources': typeof ResourcesRoute
   '/search': typeof SearchRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
+  '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +75,9 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsRoute
   '/resources': typeof ResourcesRoute
   '/search': typeof SearchRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
+  '/blog': typeof BlogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,15 +86,31 @@ export interface FileRoutesById {
   '/products': typeof ProductsRoute
   '/resources': typeof ResourcesRoute
   '/search': typeof SearchRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
+  '/blog/': typeof BlogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/pricing' | '/products' | '/resources' | '/search' | '/contract/$id'
+    | '/'
+    | '/pricing'
+    | '/products'
+    | '/resources'
+    | '/search'
+    | '/blog/$slug'
+    | '/contract/$id'
+    | '/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/pricing' | '/products' | '/resources' | '/search' | '/contract/$id'
+    | '/'
+    | '/pricing'
+    | '/products'
+    | '/resources'
+    | '/search'
+    | '/blog/$slug'
+    | '/contract/$id'
+    | '/blog'
   id:
     | '__root__'
     | '/'
@@ -86,7 +118,9 @@ export interface FileRouteTypes {
     | '/products'
     | '/resources'
     | '/search'
+    | '/blog/$slug'
     | '/contract/$id'
+    | '/blog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,7 +129,9 @@ export interface RootRouteChildren {
   ProductsRoute: typeof ProductsRoute
   ResourcesRoute: typeof ResourcesRoute
   SearchRoute: typeof SearchRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   ContractIdRoute: typeof ContractIdRoute
+  BlogIndexRoute: typeof BlogIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -135,6 +171,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contract/$id': {
       id: '/contract/$id'
       path: '/contract/$id'
@@ -151,7 +201,9 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsRoute: ProductsRoute,
   ResourcesRoute: ResourcesRoute,
   SearchRoute: SearchRoute,
+  BlogSlugRoute: BlogSlugRoute,
   ContractIdRoute: ContractIdRoute,
+  BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
