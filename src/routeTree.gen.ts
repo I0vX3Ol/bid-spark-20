@@ -13,10 +13,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DocsRouteImport } from './routes/docs'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -42,6 +45,16 @@ const DocsRoute = DocsRouteImport.update({
   path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -60,6 +73,11 @@ const ResourcesRoute = ResourcesRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrustRoute = TrustRouteImport.update({
@@ -88,10 +106,13 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/docs': typeof DocsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/products': typeof ProductsRoute
   '/resources': typeof ResourcesRoute
   '/search': typeof SearchRoute
+  '/signup': typeof SignupRoute
   '/trust': typeof TrustRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
@@ -102,10 +123,13 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/docs': typeof DocsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/products': typeof ProductsRoute
   '/resources': typeof ResourcesRoute
   '/search': typeof SearchRoute
+  '/signup': typeof SignupRoute
   '/trust': typeof TrustRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
@@ -117,10 +141,13 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/docs': typeof DocsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/products': typeof ProductsRoute
   '/resources': typeof ResourcesRoute
   '/search': typeof SearchRoute
+  '/signup': typeof SignupRoute
   '/trust': typeof TrustRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
@@ -133,10 +160,13 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/docs'
+    | '/forgot-password'
+    | '/login'
     | '/pricing'
     | '/products'
     | '/resources'
     | '/search'
+    | '/signup'
     | '/trust'
     | '/blog/$slug'
     | '/contract/$id'
@@ -147,10 +177,13 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/docs'
+    | '/forgot-password'
+    | '/login'
     | '/pricing'
     | '/products'
     | '/resources'
     | '/search'
+    | '/signup'
     | '/trust'
     | '/blog/$slug'
     | '/contract/$id'
@@ -161,10 +194,13 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/docs'
+    | '/forgot-password'
+    | '/login'
     | '/pricing'
     | '/products'
     | '/resources'
     | '/search'
+    | '/signup'
     | '/trust'
     | '/blog/$slug'
     | '/contract/$id'
@@ -176,10 +212,13 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   DocsRoute: typeof DocsRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   ProductsRoute: typeof ProductsRoute
   ResourcesRoute: typeof ResourcesRoute
   SearchRoute: typeof SearchRoute
+  SignupRoute: typeof SignupRoute
   TrustRoute: typeof TrustRoute
   BlogSlugRoute: typeof BlogSlugRoute
   ContractIdRoute: typeof ContractIdRoute
@@ -216,6 +255,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pricing': {
       id: '/pricing'
       path: '/pricing'
@@ -242,6 +295,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trust': {
@@ -280,10 +340,13 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   DocsRoute: DocsRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   ProductsRoute: ProductsRoute,
   ResourcesRoute: ResourcesRoute,
   SearchRoute: SearchRoute,
+  SignupRoute: SignupRoute,
   TrustRoute: TrustRoute,
   BlogSlugRoute: BlogSlugRoute,
   ContractIdRoute: ContractIdRoute,
