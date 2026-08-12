@@ -24,6 +24,8 @@ import { Route as TrustRouteImport } from './routes/trust'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ContractIdRouteImport } from './routes/contract.$id'
+import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
+import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -100,6 +102,16 @@ const ContractIdRoute = ContractIdRouteImport.update({
   path: '/contract/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
+  id: '/legal/privacy',
+  path: '/legal/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalTermsRoute = LegalTermsRouteImport.update({
+  id: '/legal/terms',
+  path: '/legal/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -116,6 +128,8 @@ export interface FileRoutesByFullPath {
   '/trust': typeof TrustRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
@@ -133,6 +147,8 @@ export interface FileRoutesByTo {
   '/trust': typeof TrustRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/blog': typeof BlogIndexRoute
 }
 export interface FileRoutesById {
@@ -151,6 +167,8 @@ export interface FileRoutesById {
   '/trust': typeof TrustRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/contract/$id': typeof ContractIdRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRouteTypes {
@@ -170,6 +188,8 @@ export interface FileRouteTypes {
     | '/trust'
     | '/blog/$slug'
     | '/contract/$id'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,6 +207,8 @@ export interface FileRouteTypes {
     | '/trust'
     | '/blog/$slug'
     | '/contract/$id'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/blog'
   id:
     | '__root__'
@@ -204,6 +226,8 @@ export interface FileRouteTypes {
     | '/trust'
     | '/blog/$slug'
     | '/contract/$id'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/blog/'
   fileRoutesById: FileRoutesById
 }
@@ -222,6 +246,8 @@ export interface RootRouteChildren {
   TrustRoute: typeof TrustRoute
   BlogSlugRoute: typeof BlogSlugRoute
   ContractIdRoute: typeof ContractIdRoute
+  LegalPrivacyRoute: typeof LegalPrivacyRoute
+  LegalTermsRoute: typeof LegalTermsRoute
   BlogIndexRoute: typeof BlogIndexRoute
 }
 
@@ -332,6 +358,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContractIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/privacy': {
+      id: '/legal/privacy'
+      path: '/legal/privacy'
+      fullPath: '/legal/privacy'
+      preLoaderRoute: typeof LegalPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/terms': {
+      id: '/legal/terms'
+      path: '/legal/terms'
+      fullPath: '/legal/terms'
+      preLoaderRoute: typeof LegalTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -350,6 +390,8 @@ const rootRouteChildren: RootRouteChildren = {
   TrustRoute: TrustRoute,
   BlogSlugRoute: BlogSlugRoute,
   ContractIdRoute: ContractIdRoute,
+  LegalPrivacyRoute: LegalPrivacyRoute,
+  LegalTermsRoute: LegalTermsRoute,
   BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport
