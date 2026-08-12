@@ -1,0 +1,102 @@
+import { sampleOpportunities } from "./data";
+import type { Opportunity, OpportunityFilters } from "./types";
+
+/** Facet values derived from the dataset so filters stay data-driven. */
+export function buildFacets(records: Opportunity[] = sampleOpportunities) {
+  const uniq = (values: string[]) => Array.from(new Set(values)).sort();
+  return {
+    agencies: uniq(records.map((r) => r.agency)),
+    states: uniq(records.map((r) => r.state)),
+    naics: uniq(records.map((r) => `${r.naics.code} — ${r.naics.label}`)),
+    setAsides: uniq(records.map((r) => r.setAside)),
+    industries: uniq(records.map((r) => r.industry)),
+    contractTypes: uniq(records.map((r) => r.contractType)),
+    clearances: uniq(records.map((r) => r.clearance)),
+  };
+}
+
+function matchesText(record: Opportunity, q: string) {
+  if (!q.trim()) return true;
+  const haystack = [
+    record.title,
+    record.agency,
+    record.office ?? "",
+    record.state,
+    record.city,
+    record.industry,
+    record.naics.code,
+    record.naics.label,
+    record.setAside,
+    record.aiSummary,
+  ]
+    .join(" ")
+    .toLowerCase();
+  return q
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((term) => haystack.includes(term));
+}
+
+function within(days: number | null, iso: string, direction: "past" | "future") {
+  if (days === null) return true;
+  const diff = (new Date(iso).getTime() - Date.now()) / 86_400_000;
+  return direction === "past" ? -diff <= days : diff >= 0 && diff <= days;
+}
+
+export function filterOpportunities(
+  filters: OpportunityFilters,
+  records: Opportunity[] = sampleOpportunities,
+): Opportunity[] {
+  const result = records.filter((r) => {
+    if (!matchesText(r, filters.q)) return false;
+    if (filters.agencies.length && !filters.agencies.includes(r.agency)) return false;
+    if (filters.states.length && !filters.states.includes(r.state)) return false;
+    if (filters.naics.length && !filters.naics.some((n) => n.startsWith(r.naics.code))) return false;
+    if (filters.setAsides.length && !filters.setAsides.includes(r.setAside)) return false;
+    if (filters.industries.length && !filters.industries.includes(r.industry)) return false;
+    if (filters.contractTypes.length && !filters.contractTypes.includes(r.contractType)) return false;
+    if (filters.clearances.length && !filters.clearances.includes(r.clearance)) return false;
+    if (filters.minValue !== null && (r.estimatedValue ?? 0) < filters.minValue) return false;
+    if (filters.maxValue !== null && (r.estimatedValue ?? 0) > filters.maxValue) return false;
+    if (!within(filters.postedWithinDays, r.postedDate, "past")) return false;
+    if (!within(filters.deadlineWithinDays, r.deadline, "future")) return false;
+    return true;
+  });
+
+  const sorted = [...result];
+  switch (filters.sort) {
+    case "newest":
+      sorted.sort((a, b) => +new Date(b.postedDate) - +new Date(a.postedDate));
+      break;
+    case "deadline":
+      sorted.sort((a, b) => +new Date(a.deadline) - +new Date(b.deadline));
+      break;
+    case "value":
+      sorted.sort((a, b) => (b.estimatedValue ?? 0) - (a.estimatedValue ?? 0));
+      break;
+    default:
+      sorted.sort((a, b) => b.intelligence.opportunityScore - a.intelligence.opportunityScore);
+  }
+  return sorted;
+}
+
+export function getOpportunity(id: string, records: Opportunity[] = sampleOpportunities) {
+  return records.find((r) => r.id === id) ?? null;
+}
+
+export function similarOpportunities(record: Opportunity, limit = 3) {
+  return sampleOpportunities
+    .filter((r) => r.id !== record.id)
+    .map((r) => ({
+      r,
+      score:
+        (r.industry === record.industry ? 3 : 0) +
+        (r.agency === record.agency ? 2 : 0) +
+        (r.naics.code === record.naics.code ? 2 : 0) +
+        (r.state === record.state ? 1 : 0),
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((x) => x.r);
+}
