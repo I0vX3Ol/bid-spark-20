@@ -110,7 +110,7 @@ function Index() {
               className="mx-auto mt-9 flex max-w-2xl flex-col gap-3 sm:flex-row"
               onSubmit={(e) => {
                 e.preventDefault();
-                navigate({ to: "/search", search: { q, page: 1 } });
+                navigate({ to: "/search", search: { q } });
               }}
               role="search"
             >
@@ -142,7 +142,7 @@ function Index() {
                 <Link
                   key={t}
                   to="/search"
-                  search={{ q: t, page: 1 }}
+                  search={{ q: t }}
                   className="rounded-full border border-border px-3 py-1 transition-colors hover:border-accent hover:text-foreground"
                 >
                   {t}
