@@ -6,13 +6,13 @@ import { SectionHeading } from "@/components/common/SectionHeading";
 export const Route = createFileRoute("/trust")({
   head: () => ({
     meta: [
-      { title: "Trust, Security and Compliance | NexusDel" },
+      { title: "Trust, Security and Compliance | Nexudel" },
       {
         name: "description",
         content:
-          "How NexusDel handles data security, access control, availability and compliance commitments for procurement teams.",
+          "How Nexudel handles data security, access control, availability and compliance commitments for procurement teams.",
       },
-      { property: "og:title", content: "NexusDel Trust Center" },
+      { property: "og:title", content: "Nexudel Trust Center" },
       { property: "og:description", content: "Security, availability and compliance posture." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { Filter, Mic, Search as SearchIcon, Sparkles, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
 import { AdSlot } from "@/components/common/AdSlot";
 import { PlaceholderNote } from "@/components/common/PlaceholderNote";
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { buildFacets, filterOpportunities } from "@/modules/opportunities/query";
+import { buildFacets, filterOpportunities, smartParseQuery } from "@/modules/opportunities/query";
 import { emptyFilters, type OpportunityFilters, type SortKey } from "@/modules/opportunities/types";
 
 const searchSchema = z.object({
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Search Government Contracting Opportunities | NexusDel" },
+      { title: "Search Government Contracting Opportunities | Nexudel" },
       {
         name: "description",
         content:
@@ -215,11 +216,79 @@ function SearchPage() {
   const [filters, setFilters] = useState<OpportunityFilters>({
     ...emptyFilters,
     q,
-    sort: (["newest", "deadline", "value", "relevance"].includes(sort) ? sort : "relevance") as SortKey,
+    sort: (["newest", "deadline", "value", "relevance"].includes(sort)
+      ? sort
+      : "relevance") as SortKey,
   });
   const [term, setTerm] = useState(q);
 
   const results = useMemo(() => filterOpportunities(filters), [filters]);
+  const recognitionRef = useRef<{ start: () => void; stop: () => void } | null>(null);
+  const [listening, setListening] = useState(false);
+
+  const runSmartSearch = (raw: string) => {
+    const text = raw.trim();
+    if (!text) {
+      toast.info("Type a query first, e.g. “SDVOSB cybersecurity Virginia 541512”.");
+      return;
+    }
+    const { filters: parsed, applied, q: leftover } = smartParseQuery(text);
+    setTerm(leftover);
+    setFilters({ ...emptyFilters, ...parsed, q: leftover });
+    navigate({ search: (prev) => ({ ...prev, q: leftover }) });
+    toast.success(
+      applied.length
+        ? `Applied ${applied.length} filter${applied.length > 1 ? "s" : ""}`
+        : "Searched by keywords",
+      { description: applied.length ? applied.join(" · ") : text },
+    );
+  };
+
+  const startVoiceSearch = () => {
+    type SpeechWindow = Window & {
+      SpeechRecognition?: new () => never;
+      webkitSpeechRecognition?: new () => never;
+    };
+    const w = window as SpeechWindow;
+    const SpeechRecognition = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Voice search isn't supported in this browser.", {
+        description: "Try Chrome or Edge, or type your query instead.",
+      });
+      return;
+    }
+    if (listening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+    const recognition = new SpeechRecognition() as unknown as {
+      lang: string;
+      interimResults: boolean;
+      maxAlternatives: number;
+      start: () => void;
+      stop: () => void;
+      onresult: (e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void;
+      onerror: () => void;
+      onend: () => void;
+    };
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (e) => {
+      const transcript = e.results[0]?.[0]?.transcript ?? "";
+      if (!transcript) return;
+      setTerm(transcript);
+      runSmartSearch(transcript);
+    };
+    recognition.onerror = () => {
+      toast.error("Couldn't capture audio. Check microphone permissions.");
+    };
+    recognition.onend = () => setListening(false);
+    recognitionRef.current = recognition;
+    setListening(true);
+    toast.info("Listening… speak your search.");
+    recognition.start();
+  };
 
   const activeCount =
     filters.agencies.length +
@@ -268,11 +337,23 @@ function SearchPage() {
           <Button type="submit" variant="accent" className="h-11">
             Search
           </Button>
-          <Button type="button" variant="outline" className="h-11" aria-label="Voice search">
+          <Button
+            type="button"
+            variant={listening ? "accent" : "outline"}
+            className="h-11"
+            aria-label="Voice search"
+            aria-pressed={listening}
+            onClick={startVoiceSearch}
+          >
             <Mic aria-hidden="true" />
-            <span className="hidden sm:inline">Voice</span>
+            <span className="hidden sm:inline">{listening ? "Listening" : "Voice"}</span>
           </Button>
-          <Button type="button" variant="outline" className="h-11">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11"
+            onClick={() => runSmartSearch(term)}
+          >
             <Sparkles aria-hidden="true" />
             <span className="hidden sm:inline">AI search</span>
           </Button>
@@ -292,7 +373,9 @@ function SearchPage() {
             <p className="text-sm text-muted-foreground" aria-live="polite">
               <span className="font-semibold text-foreground">{results.length}</span> opportunities
             </p>
-            {activeCount > 0 ? <Badge variant="secondary">{activeCount} filters active</Badge> : null}
+            {activeCount > 0 ? (
+              <Badge variant="secondary">{activeCount} filters active</Badge>
+            ) : null}
 
             <div className="ml-auto flex items-center gap-2">
               <Sheet>
@@ -343,7 +426,11 @@ function SearchPage() {
                 <p className="mt-2 text-sm text-muted-foreground">
                   Try removing a filter or broadening your keywords.
                 </p>
-                <Button className="mt-4" variant="outline" onClick={() => setFilters({ ...emptyFilters })}>
+                <Button
+                  className="mt-4"
+                  variant="outline"
+                  onClick={() => setFilters({ ...emptyFilters })}
+                >
                   Reset filters
                 </Button>
               </div>

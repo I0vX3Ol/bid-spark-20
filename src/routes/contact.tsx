@@ -7,13 +7,13 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact Sales and Support | NexusDel" },
+      { title: "Contact Sales and Support | Nexudel" },
       {
         name: "description",
         content:
-          "Talk to the NexusDel team about Enterprise workspaces, API access, data coverage requests or account support.",
+          "Talk to the Nexudel team about Enterprise workspaces, API access, data coverage requests or account support.",
       },
-      { property: "og:title", content: "Contact NexusDel" },
+      { property: "og:title", content: "Contact Nexudel" },
       { property: "og:description", content: "Reach sales, support or the security team." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -37,9 +37,17 @@ function ContactPage() {
         </p>
         <ul className="mt-8 space-y-5">
           {[
-            { icon: MessagesSquare, title: "Sales", body: "Enterprise workspaces, SSO and API access." },
+            {
+              icon: MessagesSquare,
+              title: "Sales",
+              body: "Enterprise workspaces, SSO and API access.",
+            },
             { icon: Mail, title: "Support", body: "Billing, account and data questions." },
-            { icon: ShieldCheck, title: "Security", body: "Vulnerability reports and compliance reviews." },
+            {
+              icon: ShieldCheck,
+              title: "Security",
+              body: "Vulnerability reports and compliance reviews.",
+            },
           ].map((item) => (
             <li key={item.title} className="flex gap-3">
               <item.icon aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-accent" />

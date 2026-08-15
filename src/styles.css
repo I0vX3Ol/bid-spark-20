@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * NexusDel design system.
+ * Nexudel design system.
  * Deep navy primary, electric blue accent, off-white surfaces, slate dark mode.
  * All colors are oklch tokens. Never hardcode colors in components.
  */
@@ -85,7 +85,7 @@
   --secondary-foreground: oklch(0.28 0.062 262);
   --muted: oklch(0.955 0.008 260);
   --muted-foreground: oklch(0.52 0.025 260);
-  --accent: oklch(0.58 0.17 254);
+  --accent: oklch(0.55 0.17 254); /* darkened from 0.58 for WCAG AA (4.5:1) on white + as button/link text */
   --accent-foreground: oklch(0.99 0.004 260);
 
   --success: oklch(0.58 0.13 158);
@@ -97,7 +97,7 @@
 
   --border: oklch(0.905 0.01 260);
   --input: oklch(0.905 0.01 260);
-  --ring: oklch(0.58 0.17 254);
+  --ring: oklch(0.55 0.17 254);
 
   --chart-1: oklch(0.58 0.17 254);
   --chart-2: oklch(0.58 0.13 158);

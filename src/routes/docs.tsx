@@ -3,16 +3,16 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/docs")({
   head: () => ({
     meta: [
-      { title: "Documentation — Platform and API Reference | NexusDel" },
+      { title: "Documentation — Platform and API Reference | Nexudel" },
       {
         name: "description",
         content:
-          "How NexusDel data is structured, how saved searches and alerts work, and how to access opportunity data programmatically.",
+          "How Nexudel data is structured, how saved searches and alerts work, and how to access opportunity data programmatically.",
       },
-      { property: "og:title", content: "NexusDel Documentation" },
+      { property: "og:title", content: "Nexudel Documentation" },
       {
         property: "og:description",
-        content: "Platform concepts, data schema and API reference for NexusDel.",
+        content: "Platform concepts, data schema and API reference for Nexudel.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -25,7 +25,7 @@ const sections = [
   {
     id: "concepts",
     heading: "Core concepts",
-    body: "An opportunity is a normalized procurement record with a jurisdiction level, an issuing agency, classification codes and a submission deadline. The same record shape backs every NexusDel surface, so grants and permits reuse the identical search, alerting and export layer.",
+    body: "An opportunity is a normalized procurement record with a jurisdiction level, an issuing agency, classification codes and a submission deadline. The same record shape backs every Nexudel surface, so grants and permits reuse the identical search, alerting and export layer.",
   },
   {
     id: "search",

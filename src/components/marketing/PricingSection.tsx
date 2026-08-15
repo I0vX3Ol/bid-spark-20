@@ -66,9 +66,7 @@ export function PricingSection({ compact = false }: { compact?: boolean }) {
               ) : null}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {plan.price[period] === 0
-                ? "Free forever"
-                : (plan.priceNote ?? "billed monthly")}
+              {plan.price[period] === 0 ? "Free forever" : (plan.priceNote ?? "billed monthly")}
             </p>
 
             <Button

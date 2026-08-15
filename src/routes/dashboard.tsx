@@ -21,13 +21,13 @@ import { sampleOpportunities } from "@/modules/opportunities/data";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Your Procurement Dashboard | NexusDel" },
+      { title: "Your Procurement Dashboard | Nexudel" },
       {
         name: "description",
         content:
           "Saved searches, bookmarked opportunities, alerts, deadlines and AI insights in one workspace.",
       },
-      { property: "og:title", content: "NexusDel Dashboard" },
+      { property: "og:title", content: "Nexudel Dashboard" },
       { property: "og:description", content: "Your personalized procurement workspace." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -51,7 +51,9 @@ function Widget({
   className?: string;
 }) {
   return (
-    <section className={`rounded-2xl border border-border bg-card p-5 shadow-subtle ${className ?? ""}`}>
+    <section
+      className={`rounded-2xl border border-border bg-card p-5 shadow-subtle ${className ?? ""}`}
+    >
       <div className="flex items-center gap-2">
         <Icon aria-hidden="true" className="h-4 w-4 text-accent" />
         <h2 className="text-sm font-semibold">{title}</h2>
@@ -209,7 +211,11 @@ function DashboardPage() {
                       {u.used} / {u.total}
                     </span>
                   </div>
-                  <Progress value={(u.used / u.total) * 100} className="mt-1.5" />
+                  <Progress
+                    value={(u.used / u.total) * 100}
+                    aria-label={`${u.label}: ${u.used} of ${u.total} used`}
+                    className="mt-1.5"
+                  />
                 </div>
               ))}
             </div>

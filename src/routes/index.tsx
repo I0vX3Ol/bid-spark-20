@@ -23,13 +23,13 @@ import { sampleOpportunities } from "@/modules/opportunities/data";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Search Every Government Contract | NexusDel Contracts Intelligence" },
+      { title: "Search Every Government Contract | Nexudel Contracts Intelligence" },
       {
         name: "description",
         content:
           "Search federal, state and local contracting opportunities in one place. AI summaries, intelligent filters, personalized alerts and opportunity intelligence.",
       },
-      { property: "og:title", content: "Search Every Government Contract | NexusDel" },
+      { property: "og:title", content: "Search Every Government Contract | Nexudel" },
       {
         property: "og:description",
         content:
@@ -76,10 +76,22 @@ const capabilities = [
 ];
 
 const steps = [
-  { n: "01", title: "Search", body: "Start with a keyword, agency or NAICS code across the full index." },
-  { n: "02", title: "Filter", body: "Narrow by set-aside, value, location and deadline until the list is yours." },
+  {
+    n: "01",
+    title: "Search",
+    body: "Start with a keyword, agency or NAICS code across the full index.",
+  },
+  {
+    n: "02",
+    title: "Filter",
+    body: "Narrow by set-aside, value, location and deadline until the list is yours.",
+  },
   { n: "03", title: "Analyze", body: "Read the AI summary, requirements breakdown and fit score." },
-  { n: "04", title: "Track", body: "Save the search, bookmark the opportunity and get alerted on changes." },
+  {
+    n: "04",
+    title: "Track",
+    body: "Save the search, bookmark the opportunity and get alerted on changes.",
+  },
 ];
 
 function Index() {
@@ -241,7 +253,10 @@ function Index() {
                 <div className="flex items-center gap-2">
                   <Building2 aria-hidden="true" className="h-4 w-4 text-accent" />
                   <h3 className="text-base font-semibold">{p.name}</h3>
-                  <Badge variant={p.status === "live" ? "secondary" : "outline"} className="ml-auto">
+                  <Badge
+                    variant={p.status === "live" ? "secondary" : "outline"}
+                    className="ml-auto"
+                  >
                     {p.status === "live" ? "Live" : "Planned"}
                   </Badge>
                 </div>

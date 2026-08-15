@@ -2,7 +2,7 @@ import type { ProductKey } from "@/config/site";
 
 /**
  * Generic opportunity record. Deliberately not contracts-only: grants, permits
- * and other NexusDel surfaces reuse this shape via `productKey` + `recordType`.
+ * and other Nexudel surfaces reuse this shape via `productKey` + `recordType`.
  */
 export type Opportunity = {
   id: string;

@@ -6,7 +6,7 @@ export function Logo({ className }: { className?: string }) {
     <Link
       to="/"
       className={cn("group inline-flex items-center gap-2.5", className)}
-      aria-label="NexusDel home"
+      aria-label="Nexudel home"
     >
       <span className="relative grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
         <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true" fill="none">
@@ -20,7 +20,7 @@ export function Logo({ className }: { className?: string }) {
         </svg>
       </span>
       <span className="font-display text-[0.98rem] font-semibold tracking-tight text-foreground">
-        NexusDel
+        Nexudel
         <span className="ml-1.5 hidden font-sans text-xs font-medium text-muted-foreground sm:inline">
           Contracts
         </span>

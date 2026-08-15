@@ -15,10 +15,10 @@ export type ProductDefinition = {
 };
 
 export const siteConfig = {
-  name: "NexusDel",
-  productSuiteName: "NexusDel Intelligence",
-  appName: "NexusDel Contracts Intelligence",
-  domain: "https://nexusdel.com",
+  name: "Nexudel",
+  productSuiteName: "Nexudel Intelligence",
+  appName: "Nexudel Contracts Intelligence",
+  domain: "https://nexudel.com",
   description:
     "Search federal, state, and local contracting opportunities with AI-powered summaries, advanced filters, personalized alerts, and procurement intelligence.",
   primaryCta: { label: "Start Free", href: "/signup" },

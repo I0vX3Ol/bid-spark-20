@@ -30,11 +30,14 @@ export const Route = createFileRoute("/contract/$id")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Opportunity unavailable | NexusDel" }, { name: "robots", content: "noindex" }],
+        meta: [
+          { title: "Opportunity unavailable | Nexudel" },
+          { name: "robots", content: "noindex" },
+        ],
       };
     }
     const o = loaderData.opportunity;
-    const title = `${o.title} — ${o.agency} | NexusDel`;
+    const title = `${o.title} — ${o.agency} | Nexudel`;
     const description = o.aiSummary.slice(0, 155);
     return {
       meta: [
@@ -74,7 +77,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-24 rounded-2xl border border-border bg-card p-6 shadow-subtle">
+    <section
+      id={id}
+      className="scroll-mt-24 rounded-2xl border border-border bg-card p-6 shadow-subtle"
+    >
       <h2 className="text-lg font-semibold">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
@@ -153,7 +159,9 @@ function ContractPage() {
                 ["Contracting office", o.office ?? o.agency],
               ].map(([label, value]) => (
                 <div key={label}>
-                  <dt className="text-xs uppercase tracking-wider text-muted-foreground">{label}</dt>
+                  <dt className="text-xs uppercase tracking-wider text-muted-foreground">
+                    {label}
+                  </dt>
                   <dd className="mt-1 text-sm font-medium">{value}</dd>
                 </div>
               ))}
@@ -275,7 +283,11 @@ function ContractPage() {
                 Opportunity score
               </p>
               <p className="mt-1 text-3xl font-semibold">{o.intelligence.opportunityScore}</p>
-              <Progress value={o.intelligence.opportunityScore} className="mt-3" />
+              <Progress
+                value={o.intelligence.opportunityScore}
+                aria-label={`Opportunity score: ${o.intelligence.opportunityScore} out of 100`}
+                className="mt-3"
+              />
               <dl className="mt-5 space-y-3 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Company fit</dt>

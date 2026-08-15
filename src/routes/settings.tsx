@@ -9,13 +9,13 @@ import { plans } from "@/config/pricing";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Account Settings | NexusDel" },
+      { title: "Account Settings | Nexudel" },
       {
         name: "description",
         content:
           "Manage your profile, billing, notification preferences, saved searches, security settings and API keys.",
       },
-      { property: "og:title", content: "NexusDel Account Settings" },
+      { property: "og:title", content: "Nexudel Account Settings" },
       { property: "og:description", content: "Manage profile, billing and notifications." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -29,7 +29,11 @@ const field =
   "mt-1.5 h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-accent";
 
 const notificationPrefs = [
-  { id: "saved-search", label: "Saved search alerts", desc: "New opportunities matching saved searches." },
+  {
+    id: "saved-search",
+    label: "Saved search alerts",
+    desc: "New opportunities matching saved searches.",
+  },
   { id: "deadlines", label: "Deadline reminders", desc: "Reminders before submission deadlines." },
   { id: "agency", label: "Agency updates", desc: "Amendments and notices from followed agencies." },
   { id: "daily", label: "Daily digest", desc: "One summary email each weekday morning." },
@@ -96,8 +100,8 @@ function SettingsPage() {
               <p className="text-sm text-muted-foreground">Current plan</p>
               <p className="mt-1 text-lg font-semibold">Free</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Upgrade to {professional.name} for {professional.limits.alerts.toLowerCase()} alerts,
-                unlimited AI analysis and exports.
+                Upgrade to {professional.name} for {professional.limits.alerts.toLowerCase()}{" "}
+                alerts, unlimited AI analysis and exports.
               </p>
               <Button variant="accent" className="mt-4">
                 Upgrade plan
@@ -120,7 +124,11 @@ function SettingsPage() {
                     </Label>
                     <p className="mt-1 text-sm text-muted-foreground">{pref.desc}</p>
                   </div>
-                  <Switch id={pref.id} className="ml-auto mt-1" defaultChecked={pref.id !== "browser"} />
+                  <Switch
+                    id={pref.id}
+                    className="ml-auto mt-1"
+                    defaultChecked={pref.id !== "browser"}
+                  />
                 </li>
               ))}
             </ul>
@@ -132,7 +140,12 @@ function SettingsPage() {
             <form className="grid max-w-md gap-5" onSubmit={(e) => e.preventDefault()}>
               <div>
                 <Label htmlFor="s-current">Current password</Label>
-                <input id="s-current" type="password" className={field} autoComplete="current-password" />
+                <input
+                  id="s-current"
+                  type="password"
+                  className={field}
+                  autoComplete="current-password"
+                />
               </div>
               <div>
                 <Label htmlFor="s-new">New password</Label>

@@ -16,13 +16,13 @@ export const Route = createFileRoute("/blog/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Article unavailable | NexusDel" }, { name: "robots", content: "noindex" }],
+        meta: [{ title: "Article unavailable | Nexudel" }, { name: "robots", content: "noindex" }],
       };
     }
     const { post } = loaderData;
     return {
       meta: [
-        { title: `${post.title} | NexusDel Blog` },
+        { title: `${post.title} | Nexudel Blog` },
         { name: "description", content: post.description },
         { property: "og:title", content: post.title },
         { property: "og:description", content: post.description },

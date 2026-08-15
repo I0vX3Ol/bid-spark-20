@@ -19,12 +19,12 @@ import { formatDate } from "@/lib/format";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin Console | NexusDel" },
+      { title: "Admin Console | Nexudel" },
       {
         name: "description",
         content: "Internal console for user management, content operations and platform analytics.",
       },
-      { property: "og:title", content: "NexusDel Admin" },
+      { property: "og:title", content: "Nexudel Admin" },
       { property: "og:description", content: "Internal operations console." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -36,14 +36,26 @@ export const Route = createFileRoute("/admin")({
 
 const modules = [
   { icon: Users, title: "Users", body: "Accounts, plans, impersonation and suspensions." },
-  { icon: FileStack, title: "Records", body: "Ingested opportunities, source health and overrides." },
+  {
+    icon: FileStack,
+    title: "Records",
+    body: "Ingested opportunities, source health and overrides.",
+  },
   { icon: Star, title: "Featured", body: "Curate promoted opportunities and homepage highlights." },
   { icon: BarChart3, title: "Analytics", body: "Acquisition, activation, retention and revenue." },
   { icon: Mail, title: "Email campaigns", body: "Digests, lifecycle sequences and broadcasts." },
   { icon: Megaphone, title: "Announcements", body: "In-app banners and release notes." },
   { icon: ShieldCheck, title: "Moderation", body: "Reported content and review queue." },
-  { icon: Settings2, title: "System settings", body: "Feature flags, limits and ingestion schedules." },
-  { icon: ScrollText, title: "Audit logs", body: "Administrative actions with actor and timestamp." },
+  {
+    icon: Settings2,
+    title: "System settings",
+    body: "Feature flags, limits and ingestion schedules.",
+  },
+  {
+    icon: ScrollText,
+    title: "Audit logs",
+    body: "Administrative actions with actor and timestamp.",
+  },
 ];
 
 function AdminPage() {
@@ -81,10 +93,18 @@ function AdminPage() {
             <caption className="sr-only">Recently ingested opportunity records</caption>
             <thead className="bg-secondary/50 text-left">
               <tr>
-                <th scope="col" className="p-3 font-semibold">Title</th>
-                <th scope="col" className="p-3 font-semibold">Agency</th>
-                <th scope="col" className="p-3 font-semibold">Posted</th>
-                <th scope="col" className="p-3 font-semibold">Status</th>
+                <th scope="col" className="p-3 font-semibold">
+                  Title
+                </th>
+                <th scope="col" className="p-3 font-semibold">
+                  Agency
+                </th>
+                <th scope="col" className="p-3 font-semibold">
+                  Posted
+                </th>
+                <th scope="col" className="p-3 font-semibold">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
