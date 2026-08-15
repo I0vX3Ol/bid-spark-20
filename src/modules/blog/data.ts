@@ -41,7 +41,7 @@ export const blogPosts: BlogPost[] = [
     description:
       "What you need before you register, the fields that most often cause rejections, and how to keep your entity active without last-minute renewals.",
     category: "SAM.gov",
-    author: { name: "Nexudel Research Team", role: "Procurement research" },
+    author: { name: "GovScout Research Team", role: "Procurement research" },
     publishedAt: "2026-07-15",
     readingMinutes: 8,
     sections: [
@@ -83,7 +83,7 @@ export const blogPosts: BlogPost[] = [
     description:
       "A repeatable triage method for capture teams: what to read first, which sections are pass/fail, and when to walk away early.",
     category: "Proposal Writing",
-    author: { name: "Nexudel Research Team", role: "Procurement research" },
+    author: { name: "GovScout Research Team", role: "Procurement research" },
     publishedAt: "2026-06-28",
     readingMinutes: 10,
     sections: [
@@ -123,7 +123,7 @@ export const blogPosts: BlogPost[] = [
     description:
       "Small business, 8(a), HUBZone, SDVOSB and WOSB set-asides compared, including certification paths and common eligibility mistakes.",
     category: "Small Business",
-    author: { name: "Nexudel Research Team", role: "Procurement research" },
+    author: { name: "GovScout Research Team", role: "Procurement research" },
     publishedAt: "2026-06-09",
     readingMinutes: 7,
     sections: [
@@ -156,7 +156,7 @@ export const blogPosts: BlogPost[] = [
     description:
       "A practical sequence for reaching Level 2 readiness without over-buying tooling, and how to document a credible remediation plan.",
     category: "Cybersecurity",
-    author: { name: "Nexudel Research Team", role: "Procurement research" },
+    author: { name: "GovScout Research Team", role: "Procurement research" },
     publishedAt: "2026-05-21",
     readingMinutes: 9,
     sections: [

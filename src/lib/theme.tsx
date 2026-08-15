@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 
 type Theme = "light" | "dark";
 
-const STORAGE_KEY = "nexudel-theme";
+const STORAGE_KEY = "govscout-theme";
 
 const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({
   theme: "light",

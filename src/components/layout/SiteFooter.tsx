@@ -56,7 +56,7 @@ export function SiteFooter() {
             monitor and win government opportunities.
           </p>
           <p className="mt-6 text-xs text-muted-foreground">
-            Nexudel is an independent platform and is not affiliated with any government agency.
+            GovScout is an independent platform and is not affiliated with any government agency.
           </p>
         </div>
         <nav aria-label="Footer" className="grid grid-cols-2 gap-8 md:col-span-8 md:grid-cols-4">

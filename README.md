@@ -1,4 +1,4 @@
-# Nexudel Contracts Intelligence
+# GovScout Contracts Intelligence
 
 ROLE
 
@@ -34,7 +34,7 @@ PRODUCT
 
 Name:
 
-Nexudel Contracts Intelligence
+GovScout Contracts Intelligence
 
 Purpose:
 
@@ -774,7 +774,7 @@ Production-quality code
 
 FUTURE SCALABILITY
 
-Architect the application so it can later support additional Nexudel products using the same authentication, billing, navigation, dashboard, and design system, including:
+Architect the application so it can later support additional GovScout products using the same authentication, billing, navigation, dashboard, and design system, including:
 
 Grants
 

@@ -7,13 +7,13 @@ import { plans } from "@/config/pricing";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — Procurement Intelligence Plans | Nexudel" },
+      { title: "Pricing — Procurement Intelligence Plans | GovScout" },
       {
         name: "description",
         content:
-          "Compare Nexudel plans: free opportunity search, Professional alerts and AI analysis, and Enterprise workspaces with API access and SSO.",
+          "Compare GovScout plans: free opportunity search, Professional alerts and AI analysis, and Enterprise workspaces with API access and SSO.",
       },
-      { property: "og:title", content: "Nexudel Pricing" },
+      { property: "og:title", content: "GovScout Pricing" },
       {
         property: "og:description",
         content: "Free, Professional and Enterprise plans for government contracting teams.",
@@ -52,7 +52,7 @@ function PricingPage() {
         <h2 className="text-2xl font-semibold">Plan comparison</h2>
         <div className="mt-6 overflow-x-auto rounded-2xl border border-border">
           <table className="w-full min-w-[36rem] border-collapse text-sm">
-            <caption className="sr-only">Feature comparison across Nexudel plans</caption>
+            <caption className="sr-only">Feature comparison across GovScout plans</caption>
             <thead>
               <tr className="border-b border-border bg-secondary/50 text-left">
                 <th scope="col" className="p-4 font-semibold">

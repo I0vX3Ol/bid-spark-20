@@ -21,13 +21,13 @@ import { sampleOpportunities } from "@/modules/opportunities/data";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Your Procurement Dashboard | Nexudel" },
+      { title: "Your Procurement Dashboard | GovScout" },
       {
         name: "description",
         content:
           "Saved searches, bookmarked opportunities, alerts, deadlines and AI insights in one workspace.",
       },
-      { property: "og:title", content: "Nexudel Dashboard" },
+      { property: "og:title", content: "GovScout Dashboard" },
       { property: "og:description", content: "Your personalized procurement workspace." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -8,13 +8,13 @@ import { products } from "@/config/site";
 export const Route = createFileRoute("/products")({
   head: () => ({
     meta: [
-      { title: "Products — Public Sector Intelligence Suite | Nexudel" },
+      { title: "Products — Public Sector Intelligence Suite | GovScout" },
       {
         name: "description",
         content:
           "Contracts Intelligence is live today. Grants, permits, inspections and public records intelligence share the same platform, account and design system.",
       },
-      { property: "og:title", content: "Nexudel Product Suite" },
+      { property: "og:title", content: "GovScout Product Suite" },
       {
         property: "og:description",
         content: "One platform for contracts, grants, permits and public record intelligence.",

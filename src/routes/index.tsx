@@ -23,13 +23,13 @@ import { sampleOpportunities } from "@/modules/opportunities/data";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Search Every Government Contract | Nexudel Contracts Intelligence" },
+      { title: "Search Every Government Contract | GovScout Contracts Intelligence" },
       {
         name: "description",
         content:
           "Search federal, state and local contracting opportunities in one place. AI summaries, intelligent filters, personalized alerts and opportunity intelligence.",
       },
-      { property: "og:title", content: "Search Every Government Contract | Nexudel" },
+      { property: "og:title", content: "Search Every Government Contract | GovScout" },
       {
         property: "og:description",
         content:

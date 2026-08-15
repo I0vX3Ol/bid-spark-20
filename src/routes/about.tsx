@@ -4,13 +4,13 @@ import { SectionHeading } from "@/components/common/SectionHeading";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About Nexudel — Public Sector Intelligence" },
+      { title: "About GovScout — Public Sector Intelligence" },
       {
         name: "description",
         content:
-          "Nexudel builds procurement intelligence software that makes public sector opportunity data searchable, understandable and actionable.",
+          "GovScout builds procurement intelligence software that makes public sector opportunity data searchable, understandable and actionable.",
       },
-      { property: "og:title", content: "About Nexudel" },
+      { property: "og:title", content: "About GovScout" },
       {
         property: "og:description",
         content: "Why we are building procurement intelligence for public sector bidders.",
@@ -30,7 +30,7 @@ function AboutPage() {
         align="left"
         eyebrow="About"
         title="Public procurement data should be usable, not just available"
-        description="Government opportunity data is public, fragmented and hard to act on. Nexudel normalizes it, explains it and puts it in front of the teams who can deliver the work."
+        description="Government opportunity data is public, fragmented and hard to act on. GovScout normalizes it, explains it and puts it in front of the teams who can deliver the work."
       />
 
       <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -63,7 +63,7 @@ function AboutPage() {
           treated as product features, not implementation details.
         </p>
         <p className="mt-4 leading-relaxed text-muted-foreground">
-          Nexudel is an independent company and is not affiliated with, endorsed by, or acting on
+          GovScout is an independent company and is not affiliated with, endorsed by, or acting on
           behalf of any government agency.
         </p>
       </section>

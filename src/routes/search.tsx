@@ -32,7 +32,7 @@ export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Search Government Contracting Opportunities | Nexudel" },
+      { title: "Search Government Contracting Opportunities | GovScout" },
       {
         name: "description",
         content:

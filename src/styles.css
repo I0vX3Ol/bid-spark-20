@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Nexudel design system.
+ * GovScout design system.
  * Deep navy primary, electric blue accent, off-white surfaces, slate dark mode.
  * All colors are oklch tokens. Never hardcode colors in components.
  */

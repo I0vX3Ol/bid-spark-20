@@ -7,10 +7,10 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
-      { title: "Reset your Nexudel password" },
-      { name: "description", content: "Request a password reset link for your Nexudel account." },
+      { title: "Reset your GovScout password" },
+      { name: "description", content: "Request a password reset link for your GovScout account." },
       { property: "og:title", content: "Reset your password" },
-      { property: "og:description", content: "Request a Nexudel password reset link." },
+      { property: "og:description", content: "Request a GovScout password reset link." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

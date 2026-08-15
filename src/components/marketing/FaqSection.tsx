@@ -9,7 +9,7 @@ import {
 export const faqs = [
   {
     q: "Where does the opportunity data come from?",
-    a: "Nexudel aggregates publicly available procurement records from federal, state and local sources, normalizes them into a single schema, and enriches each record with AI analysis. Every record links back to its originating source.",
+    a: "GovScout aggregates publicly available procurement records from federal, state and local sources, normalizes them into a single schema, and enriches each record with AI analysis. Every record links back to its originating source.",
   },
   {
     q: "How accurate are the AI summaries?",

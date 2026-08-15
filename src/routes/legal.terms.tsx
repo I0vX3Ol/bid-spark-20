@@ -3,14 +3,14 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/legal/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service | Nexudel" },
+      { title: "Terms of Service | GovScout" },
       {
         name: "description",
         content:
-          "The terms that govern use of the Nexudel platform, including acceptable use, subscriptions and data accuracy disclaimers.",
+          "The terms that govern use of the GovScout platform, including acceptable use, subscriptions and data accuracy disclaimers.",
       },
-      { property: "og:title", content: "Nexudel Terms of Service" },
-      { property: "og:description", content: "Terms governing use of the Nexudel platform." },
+      { property: "og:title", content: "GovScout Terms of Service" },
+      { property: "og:description", content: "Terms governing use of the GovScout platform." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/legal/terms")({
 const sections = [
   {
     heading: "Using the service",
-    body: "You may use Nexudel for lawful business purposes. You are responsible for the security of your account credentials and for activity performed under your account.",
+    body: "You may use GovScout for lawful business purposes. You are responsible for the security of your account credentials and for activity performed under your account.",
   },
   {
     heading: "Subscriptions and billing",

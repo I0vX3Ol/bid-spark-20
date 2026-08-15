@@ -15,10 +15,10 @@ export type ProductDefinition = {
 };
 
 export const siteConfig = {
-  name: "Nexudel",
-  productSuiteName: "Nexudel Intelligence",
-  appName: "Nexudel Contracts Intelligence",
-  domain: "https://nexudel.com",
+  name: "GovScout",
+  productSuiteName: "GovScout Intelligence",
+  appName: "GovScout Contracts Intelligence",
+  domain: "https://govscout.nexudel.com",
   description:
     "Search federal, state, and local contracting opportunities with AI-powered summaries, advanced filters, personalized alerts, and procurement intelligence.",
   primaryCta: { label: "Start Free", href: "/signup" },

@@ -9,13 +9,13 @@ import { plans } from "@/config/pricing";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Account Settings | Nexudel" },
+      { title: "Account Settings | GovScout" },
       {
         name: "description",
         content:
           "Manage your profile, billing, notification preferences, saved searches, security settings and API keys.",
       },
-      { property: "og:title", content: "Nexudel Account Settings" },
+      { property: "og:title", content: "GovScout Account Settings" },
       { property: "og:description", content: "Manage profile, billing and notifications." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -7,13 +7,13 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact Sales and Support | Nexudel" },
+      { title: "Contact Sales and Support | GovScout" },
       {
         name: "description",
         content:
-          "Talk to the Nexudel team about Enterprise workspaces, API access, data coverage requests or account support.",
+          "Talk to the GovScout team about Enterprise workspaces, API access, data coverage requests or account support.",
       },
-      { property: "og:title", content: "Contact Nexudel" },
+      { property: "og:title", content: "Contact GovScout" },
       { property: "og:description", content: "Reach sales, support or the security team." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

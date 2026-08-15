@@ -5,13 +5,13 @@ import { SectionHeading } from "@/components/common/SectionHeading";
 export const Route = createFileRoute("/resources")({
   head: () => ({
     meta: [
-      { title: "Resources for Government Contractors | Nexudel" },
+      { title: "Resources for Government Contractors | GovScout" },
       {
         name: "description",
         content:
           "Guides, templates and reference material for federal, state and local contracting teams — from SAM.gov registration to proposal review.",
       },
-      { property: "og:title", content: "Nexudel Resources" },
+      { property: "og:title", content: "GovScout Resources" },
       {
         property: "og:description",
         content: "Practical guides and references for public sector capture teams.",

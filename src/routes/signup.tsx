@@ -7,13 +7,13 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
-      { title: "Create your free Nexudel account" },
+      { title: "Create your free GovScout account" },
       {
         name: "description",
         content:
           "Start free: search every federal, state and local contracting opportunity with AI summaries and saved searches.",
       },
-      { property: "og:title", content: "Start free on Nexudel" },
+      { property: "og:title", content: "Start free on GovScout" },
       {
         property: "og:description",
         content: "Government contracting intelligence, free to start.",

@@ -3,13 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/legal/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy | Nexudel" },
+      { title: "Privacy Policy | GovScout" },
       {
         name: "description",
         content:
-          "How Nexudel collects, uses, stores and protects personal information for account holders and site visitors.",
+          "How GovScout collects, uses, stores and protects personal information for account holders and site visitors.",
       },
-      { property: "og:title", content: "Nexudel Privacy Policy" },
+      { property: "og:title", content: "GovScout Privacy Policy" },
       { property: "og:description", content: "Our approach to personal data and privacy." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

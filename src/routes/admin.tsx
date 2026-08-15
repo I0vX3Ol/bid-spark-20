@@ -19,12 +19,12 @@ import { formatDate } from "@/lib/format";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin Console | Nexudel" },
+      { title: "Admin Console | GovScout" },
       {
         name: "description",
         content: "Internal console for user management, content operations and platform analytics.",
       },
-      { property: "og:title", content: "Nexudel Admin" },
+      { property: "og:title", content: "GovScout Admin" },
       { property: "og:description", content: "Internal operations console." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

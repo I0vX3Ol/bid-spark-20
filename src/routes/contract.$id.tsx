@@ -31,13 +31,13 @@ export const Route = createFileRoute("/contract/$id")({
     if (!loaderData) {
       return {
         meta: [
-          { title: "Opportunity unavailable | Nexudel" },
+          { title: "Opportunity unavailable | GovScout" },
           { name: "robots", content: "noindex" },
         ],
       };
     }
     const o = loaderData.opportunity;
-    const title = `${o.title} — ${o.agency} | Nexudel`;
+    const title = `${o.title} — ${o.agency} | GovScout`;
     const description = o.aiSummary.slice(0, 155);
     return {
       meta: [

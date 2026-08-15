@@ -10,13 +10,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/blog/")({
   head: () => ({
     meta: [
-      { title: "Government Contracting Blog — Guides and Analysis | Nexudel" },
+      { title: "Government Contracting Blog — Guides and Analysis | GovScout" },
       {
         name: "description",
         content:
-          "Practical guidance on federal contracting, SAM.gov, proposal writing, compliance and procurement strategy from the Nexudel research team.",
+          "Practical guidance on federal contracting, SAM.gov, proposal writing, compliance and procurement strategy from the GovScout research team.",
       },
-      { property: "og:title", content: "Nexudel Blog" },
+      { property: "og:title", content: "GovScout Blog" },
       {
         property: "og:description",
         content: "Guides and analysis for government contracting teams.",
@@ -39,7 +39,7 @@ function BlogIndex() {
         align="left"
         eyebrow="Blog"
         title="Guides and analysis for public sector bidders"
-        description="Written by the Nexudel research team. No fluff, no invented statistics."
+        description="Written by the GovScout research team. No fluff, no invented statistics."
       />
 
       <div className="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
