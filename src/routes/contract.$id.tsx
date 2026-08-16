@@ -20,12 +20,14 @@ import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/config/site";
 import { daysUntil, formatCurrencyCompact, formatDate } from "@/lib/format";
 import { getOpportunity, similarOpportunities } from "@/modules/opportunities/query";
+import { fetchOpportunities } from "@/modules/opportunities/remote";
 
 export const Route = createFileRoute("/contract/$id")({
-  loader: ({ params }) => {
-    const opportunity = getOpportunity(params.id);
+  loader: async ({ params }) => {
+    const records = await fetchOpportunities();
+    const opportunity = getOpportunity(params.id, records);
     if (!opportunity) throw notFound();
-    return { opportunity, similar: similarOpportunities(opportunity) };
+    return { opportunity, similar: similarOpportunities(opportunity, 3, records) };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {

@@ -21,7 +21,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { buildFacets, filterOpportunities, smartParseQuery } from "@/modules/opportunities/query";
-import { emptyFilters, type OpportunityFilters, type SortKey } from "@/modules/opportunities/types";
+import { fetchOpportunities } from "@/modules/opportunities/remote";
+import {
+  emptyFilters,
+  type Opportunity,
+  type OpportunityFilters,
+  type SortKey,
+} from "@/modules/opportunities/types";
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -30,6 +36,7 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
+  loader: () => fetchOpportunities(),
   head: () => ({
     meta: [
       { title: "Search Government Contracting Opportunities | GovScout" },
@@ -75,11 +82,13 @@ const facetLabels: Record<FacetKey, string> = {
 function FilterPanel({
   filters,
   setFilters,
+  records,
 }: {
   filters: OpportunityFilters;
   setFilters: (f: OpportunityFilters) => void;
+  records: Opportunity[];
 }) {
-  const facets = useMemo(() => buildFacets(), []);
+  const facets = useMemo(() => buildFacets(records), [records]);
 
   const toggle = (key: keyof OpportunityFilters, value: string) => {
     const current = filters[key] as string[];
@@ -212,6 +221,7 @@ function FilterPanel({
 
 function SearchPage() {
   const { q, sort } = Route.useSearch();
+  const records = Route.useLoaderData();
   const navigate = useNavigate({ from: "/search" });
   const [filters, setFilters] = useState<OpportunityFilters>({
     ...emptyFilters,
@@ -222,7 +232,7 @@ function SearchPage() {
   });
   const [term, setTerm] = useState(q);
 
-  const results = useMemo(() => filterOpportunities(filters), [filters]);
+  const results = useMemo(() => filterOpportunities(filters, records), [filters, records]);
   const recognitionRef = useRef<{ start: () => void; stop: () => void } | null>(null);
   const [listening, setListening] = useState(false);
 
@@ -232,7 +242,7 @@ function SearchPage() {
       toast.info("Type a query first, e.g. “SDVOSB cybersecurity Virginia 541512”.");
       return;
     }
-    const { filters: parsed, applied, q: leftover } = smartParseQuery(text);
+    const { filters: parsed, applied, q: leftover } = smartParseQuery(text, records);
     setTerm(leftover);
     setFilters({ ...emptyFilters, ...parsed, q: leftover });
     navigate({ search: (prev) => ({ ...prev, q: leftover }) });
@@ -364,7 +374,7 @@ function SearchPage() {
         <aside className="hidden lg:col-span-3 lg:block">
           <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-subtle">
             <h2 className="mb-4 text-sm font-semibold">Filters</h2>
-            <FilterPanel filters={filters} setFilters={setFilters} />
+            <FilterPanel filters={filters} setFilters={setFilters} records={records} />
           </div>
         </aside>
 
@@ -387,7 +397,7 @@ function SearchPage() {
                 <SheetContent side="left" className="w-[90vw] max-w-sm overflow-y-auto">
                   <SheetTitle>Filters</SheetTitle>
                   <div className="mt-4">
-                    <FilterPanel filters={filters} setFilters={setFilters} />
+                    <FilterPanel filters={filters} setFilters={setFilters} records={records} />
                   </div>
                 </SheetContent>
               </Sheet>

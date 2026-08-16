@@ -144,8 +144,12 @@ export function getOpportunity(id: string, records: Opportunity[] = sampleOpport
   return records.find((r) => r.id === id) ?? null;
 }
 
-export function similarOpportunities(record: Opportunity, limit = 3) {
-  return sampleOpportunities
+export function similarOpportunities(
+  record: Opportunity,
+  limit = 3,
+  records: Opportunity[] = sampleOpportunities,
+) {
+  return records
     .filter((r) => r.id !== record.id)
     .map((r) => ({
       r,
