@@ -1,3 +1,4 @@
+import { RequireAuth } from "@/lib/require-auth";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Activity,
@@ -34,7 +35,11 @@ export const Route = createFileRoute("/dashboard")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: DashboardPage,
+  component: () => (
+    <RequireAuth>
+      <DashboardPage />
+    </RequireAuth>
+  ),
 });
 
 function Widget({

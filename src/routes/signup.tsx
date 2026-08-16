@@ -1,4 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useAuth } from "@/lib/auth";
 import { Check } from "lucide-react";
 import { AuthShell, authField } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,27 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupPage() {
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    const { error } = await signUp({ email, password, fullName });
+    setSubmitting(false);
+    if (error) {
+      setError(error);
+      return;
+    }
+    navigate({ to: "/dashboard" });
+  }
+
   return (
     <AuthShell
       title="Start free"
@@ -39,14 +62,37 @@ function SignupPage() {
         </>
       }
     >
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        {error && (
+          <p
+            role="alert"
+            className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
+            {error}
+          </p>
+        )}
         <div>
           <Label htmlFor="name">Full name</Label>
-          <input id="name" required autoComplete="name" className={authField} />
+          <input
+            id="name"
+            required
+            autoComplete="name"
+            className={authField}
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
         </div>
         <div>
           <Label htmlFor="email">Work email</Label>
-          <input id="email" type="email" required autoComplete="email" className={authField} />
+          <input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            className={authField}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div>
           <Label htmlFor="password">Password</Label>
@@ -54,12 +100,15 @@ function SignupPage() {
             id="password"
             type="password"
             required
+            minLength={8}
             autoComplete="new-password"
             className={authField}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <Button type="submit" variant="accent" size="lg" className="w-full">
-          Create account
+        <Button type="submit" variant="accent" size="lg" className="w-full" disabled={submitting}>
+          {submitting ? "Creating account…" : "Create account"}
         </Button>
       </form>
       <ul className="mt-6 space-y-2 border-t border-border pt-5">

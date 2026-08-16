@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthShell, authField } from "@/components/auth/AuthShell";
+import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
@@ -20,6 +21,8 @@ export const Route = createFileRoute("/forgot-password")({
 });
 
 function ForgotPasswordPage() {
+  const { resetPassword } = useAuth();
+  const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   return (
     <AuthShell
@@ -33,14 +36,23 @@ function ForgotPasswordPage() {
     >
       <form
         className="space-y-4"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
+          await resetPassword(email);
           setSent(true);
         }}
       >
         <div>
           <Label htmlFor="email">Work email</Label>
-          <input id="email" type="email" required autoComplete="email" className={authField} />
+          <input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            className={authField}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <Button type="submit" variant="accent" size="lg" className="w-full">
           Send reset link

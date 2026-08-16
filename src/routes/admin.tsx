@@ -1,3 +1,4 @@
+import { RequireAuth } from "@/lib/require-auth";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   BarChart3,
@@ -31,7 +32,11 @@ export const Route = createFileRoute("/admin")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: AdminPage,
+  component: () => (
+    <RequireAuth>
+      <AdminPage />
+    </RequireAuth>
+  ),
 });
 
 const modules = [

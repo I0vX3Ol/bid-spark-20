@@ -1,3 +1,4 @@
+import { RequireAuth } from "@/lib/require-auth";
 import { createFileRoute } from "@tanstack/react-router";
 import { PlaceholderNote } from "@/components/common/PlaceholderNote";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { plans } from "@/config/pricing";
+import { useAuth } from "@/lib/auth";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -22,7 +25,11 @@ export const Route = createFileRoute("/settings")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: SettingsPage,
+  component: () => (
+    <RequireAuth>
+      <SettingsPage />
+    </RequireAuth>
+  ),
 });
 
 const field =
@@ -52,10 +59,23 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 function SettingsPage() {
   const professional = plans.find((p) => p.id === "professional")!;
+  const { signOut, user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="container-page py-10">
-      <h1 className="text-2xl font-semibold sm:text-3xl">Account settings</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold sm:text-3xl">Account settings</h1>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            await signOut();
+            navigate({ to: "/login" });
+          }}
+        >
+          Log out{user?.email ? ` (${user.email})` : ""}
+        </Button>
+      </div>
 
       <Tabs defaultValue="profile" className="mt-8">
         <TabsList className="flex-wrap">
