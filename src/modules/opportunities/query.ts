@@ -1,8 +1,7 @@
-import { sampleOpportunities } from "./data";
 import type { Opportunity, OpportunityFilters } from "./types";
 
 /** Facet values derived from the dataset so filters stay data-driven. */
-export function buildFacets(records: Opportunity[] = sampleOpportunities) {
+export function buildFacets(records: Opportunity[]) {
   const uniq = (values: string[]) => Array.from(new Set(values)).sort();
   return {
     agencies: uniq(records.map((r) => r.agency)),
@@ -46,7 +45,7 @@ function within(days: number | null, iso: string, direction: "past" | "future") 
 
 export function filterOpportunities(
   filters: OpportunityFilters,
-  records: Opportunity[] = sampleOpportunities,
+  records: Opportunity[],
 ): Opportunity[] {
   const result = records.filter((r) => {
     if (!matchesText(r, filters.q)) return false;
@@ -90,7 +89,7 @@ export function filterOpportunities(
  */
 export function smartParseQuery(
   query: string,
-  records: Opportunity[] = sampleOpportunities,
+  records: Opportunity[],
 ): { filters: Partial<OpportunityFilters>; applied: string[]; q: string } {
   const facets = buildFacets(records);
   const lower = query.toLowerCase();
@@ -140,15 +139,11 @@ export function smartParseQuery(
   return { filters, applied, q: remaining.replace(/\s+/g, " ").trim() };
 }
 
-export function getOpportunity(id: string, records: Opportunity[] = sampleOpportunities) {
+export function getOpportunity(id: string, records: Opportunity[]) {
   return records.find((r) => r.id === id) ?? null;
 }
 
-export function similarOpportunities(
-  record: Opportunity,
-  limit = 3,
-  records: Opportunity[] = sampleOpportunities,
-) {
+export function similarOpportunities(record: Opportunity, limit = 3, records: Opportunity[]) {
   return records
     .filter((r) => r.id !== record.id)
     .map((r) => ({

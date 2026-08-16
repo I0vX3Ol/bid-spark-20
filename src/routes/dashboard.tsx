@@ -1,5 +1,5 @@
 import { RequireAuth } from "@/lib/require-auth";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import {
   Activity,
   Bell,
@@ -17,9 +17,26 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { daysUntil, formatDate } from "@/lib/format";
-import { sampleOpportunities } from "@/modules/opportunities/data";
+import {
+  fetchBookmarks,
+  fetchOpportunities,
+  fetchProfile,
+  fetchSavedSearches,
+  deleteSavedSearch,
+} from "@/modules/opportunities/remote";
+import type { GovProfile, SavedSearch } from "@/modules/opportunities/remote";
+import type { Opportunity } from "@/modules/opportunities/types";
 
 export const Route = createFileRoute("/dashboard")({
+  loader: async () => {
+    const [opportunities, savedSearches, bookmarks, profile] = await Promise.all([
+      fetchOpportunities(),
+      fetchSavedSearches(),
+      fetchBookmarks(),
+      fetchProfile(),
+    ]);
+    return { opportunities, savedSearches, bookmarks, profile };
+  },
   head: () => ({
     meta: [
       { title: "Your Procurement Dashboard | GovScout" },
@@ -69,25 +86,33 @@ function Widget({
   );
 }
 
-const savedSearches = [
-  { name: "Cybersecurity · Federal · Secret", matches: 12, alert: "Real-time" },
-  { name: "Virginia IT services", matches: 7, alert: "Daily" },
-  { name: "SDVOSB medical equipment", matches: 4, alert: "Weekly" },
-];
-
-const activity = [
-  { text: "New match for “Cybersecurity · Federal · Secret”", when: "2 hours ago" },
-  { text: "Deadline reminder sent for PHX-WS-26-114", when: "Yesterday" },
-  { text: "Weekly summary delivered", when: "3 days ago" },
-];
-
 function DashboardPage() {
-  const upcoming = [...sampleOpportunities]
+  const router = useRouter();
+  const { opportunities, savedSearches, bookmarks, profile } = Route.useLoaderData() as {
+    opportunities: Opportunity[];
+    savedSearches: SavedSearch[];
+    bookmarks: string[];
+    profile: GovProfile | null;
+  };
+
+  const now = Date.now();
+  const upcoming = [...opportunities]
+    .filter((o) => +new Date(o.deadline) >= now)
     .sort((a, b) => +new Date(a.deadline) - +new Date(b.deadline))
     .slice(0, 4);
-  const recommended = [...sampleOpportunities]
+  const bookmarked = opportunities.filter((o) => bookmarks.includes(o.id));
+  const recommended = [...opportunities]
     .sort((a, b) => b.intelligence.fitScore - a.intelligence.fitScore)
     .slice(0, 2);
+
+  const removeSearch = async (id: string, name: string) => {
+    try {
+      await deleteSavedSearch(id);
+      await router.invalidate();
+    } catch {
+      window.alert(`Couldn't delete ${name}.`);
+    }
+  };
 
   return (
     <div className="container-page py-8">
@@ -110,17 +135,17 @@ function DashboardPage() {
         </div>
       </div>
 
-      <PlaceholderNote className="mt-5">
-        Demonstration workspace populated with sample data.
-      </PlaceholderNote>
-
       <div className="mt-6 grid gap-5 lg:grid-cols-12">
         <div className="space-y-5 lg:col-span-8">
           <div className="grid gap-5 sm:grid-cols-3">
             {[
-              { label: "Saved searches", value: "3", icon: SearchIcon },
-              { label: "Bookmarks", value: "11", icon: Bookmark },
-              { label: "Alerts this week", value: "24", icon: Bell },
+              { label: "Saved searches", value: String(savedSearches.length), icon: SearchIcon },
+              { label: "Bookmarks", value: String(bookmarks.length), icon: Bookmark },
+              {
+                label: "Alerts enabled",
+                value: String(savedSearches.filter((s) => s.alertFrequency !== "none").length),
+                icon: Bell,
+              },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -171,9 +196,14 @@ function DashboardPage() {
             </ul>
           </Widget>
 
-          <Widget title="Recently viewed" icon={Eye}>
+          <Widget title="Bookmarked" icon={Eye}>
             <ul className="space-y-2.5">
-              {sampleOpportunities.slice(0, 3).map((o) => (
+              {bookmarked.length === 0 ? (
+                <li className="text-sm text-muted-foreground">
+                  Nothing bookmarked yet — save an opportunity from search.
+                </li>
+              ) : null}
+              {bookmarked.slice(0, 5).map((o) => (
                 <li key={o.id}>
                   <Link
                     to="/contract/$id"
@@ -191,56 +221,75 @@ function DashboardPage() {
         <div className="space-y-5 lg:col-span-4">
           <Widget title="Saved searches" icon={SearchIcon}>
             <ul className="space-y-3">
+              {savedSearches.length === 0 ? (
+                <li className="text-sm text-muted-foreground">
+                  No saved searches yet — run a search and save it.
+                </li>
+              ) : null}
               {savedSearches.map((s) => (
-                <li key={s.name} className="rounded-xl border border-border p-3">
-                  <p className="text-sm font-medium">{s.name}</p>
+                <li key={s.id} className="rounded-xl border border-border p-3">
+                  <div className="flex items-start gap-2">
+                    <p className="text-sm font-medium">{s.name}</p>
+                    <button
+                      type="button"
+                      onClick={() => void removeSearch(s.id, s.name)}
+                      className="ml-auto text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Remove
+                    </button>
+                  </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {s.matches} new matches · {s.alert} alerts
+                    {s.alertFrequency === "none" ? "No alerts" : `${s.alertFrequency} alerts`}
                   </p>
                 </li>
               ))}
             </ul>
           </Widget>
 
-          <Widget title="Account usage" icon={Activity}>
+          <Widget title="Plan" icon={Activity}>
             <div className="space-y-4">
-              {[
-                { label: "AI analyses", used: 7, total: 10 },
-                { label: "Exports", used: 2, total: 5 },
-                { label: "Saved searches", used: 3, total: 3 },
-              ].map((u) => (
-                <div key={u.label}>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">{u.label}</span>
-                    <span className="font-medium">
-                      {u.used} / {u.total}
-                    </span>
-                  </div>
-                  <Progress
-                    value={(u.used / u.total) * 100}
-                    aria-label={`${u.label}: ${u.used} of ${u.total} used`}
-                    className="mt-1.5"
-                  />
+              <div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Saved searches</span>
+                  <span className="font-medium">{savedSearches.length}</span>
                 </div>
-              ))}
+                <Progress
+                  value={Math.min(100, savedSearches.length * 20)}
+                  aria-label={`${savedSearches.length} saved searches`}
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Bookmarks</span>
+                  <span className="font-medium">{bookmarks.length}</span>
+                </div>
+                <Progress
+                  value={Math.min(100, bookmarks.length * 10)}
+                  aria-label={`${bookmarks.length} bookmarks`}
+                  className="mt-1.5"
+                />
+              </div>
             </div>
             <div className="mt-5 rounded-xl border border-accent/30 bg-accent/8 p-4">
-              <p className="text-sm font-medium">Free plan</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Upgrade for unlimited AI analysis, exports and real-time alerts.
+              <p className="text-sm font-medium">
+                {profile?.plan === "free" ? "Free plan" : `${profile?.plan ?? "Free"} plan`}
               </p>
-              <Button asChild variant="accent" size="sm" className="mt-3 w-full">
-                <Link to="/pricing">Upgrade to Professional</Link>
-              </Button>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Paid plans are not available yet.
+              </p>
             </div>
           </Widget>
 
-          <Widget title="Activity feed" icon={Clock}>
+          <Widget title="Recent saves" icon={Clock}>
             <ul className="space-y-3">
-              {activity.map((a) => (
-                <li key={a.text} className="text-sm">
-                  <p className="text-foreground">{a.text}</p>
-                  <p className="text-xs text-muted-foreground">{a.when}</p>
+              {savedSearches.length === 0 ? (
+                <li className="text-sm text-muted-foreground">Nothing yet.</li>
+              ) : null}
+              {savedSearches.slice(0, 5).map((s) => (
+                <li key={s.id} className="text-sm">
+                  <p className="text-foreground">Saved “{s.name}”</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(s.createdAt)}</p>
                 </li>
               ))}
             </ul>

@@ -8,6 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { plans } from "@/config/pricing";
 import { useAuth } from "@/lib/auth";
 import { useNavigate } from "@tanstack/react-router";
+import { fetchProfile, updateProfile } from "@/modules/opportunities/remote";
+import type { GovProfile } from "@/modules/opportunities/remote";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -58,9 +61,50 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 }
 
 function SettingsPage() {
-  const professional = plans.find((p) => p.id === "professional")!;
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
+  const [profile, setProfile] = useState<GovProfile | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedMessage, setSavedMessage] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchProfile().then((row) => {
+      if (!cancelled) setProfile(row);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const saveProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    setSaving(true);
+    setSavedMessage("");
+    try {
+      await updateProfile({
+        full_name: String(data.get("p-name") ?? ""),
+        company: String(data.get("p-company") ?? ""),
+        naics_codes: String(data.get("p-naics") ?? ""),
+      });
+      setSavedMessage("Saved.");
+    } catch {
+      setSavedMessage("Couldn't save those changes.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const savePrefs = async (id: string, value: boolean) => {
+    const next = { ...(profile?.notificationPrefs ?? {}), [id]: value };
+    setProfile((prev) => (prev ? { ...prev, notificationPrefs: next } : prev));
+    try {
+      await updateProfile({ notification_prefs: next });
+    } catch {
+      /* keep the optimistic value; the next load will correct it */
+    }
+  };
 
   return (
     <div className="container-page py-10">
@@ -88,27 +132,59 @@ function SettingsPage() {
 
         <TabsContent value="profile" className="mt-6">
           <Panel title="Profile">
-            <form className="grid gap-5 sm:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
+            <form
+              key={profile?.id ?? "loading"}
+              className="grid gap-5 sm:grid-cols-2"
+              onSubmit={(e) => void saveProfile(e)}
+            >
               <div>
                 <Label htmlFor="p-name">Full name</Label>
-                <input id="p-name" className={field} autoComplete="name" />
+                <input
+                  id="p-name"
+                  name="p-name"
+                  defaultValue={profile?.fullName ?? ""}
+                  className={field}
+                  autoComplete="name"
+                />
               </div>
               <div>
                 <Label htmlFor="p-email">Work email</Label>
-                <input id="p-email" type="email" className={field} autoComplete="email" />
+                <input
+                  id="p-email"
+                  type="email"
+                  defaultValue={profile?.email ?? ""}
+                  readOnly
+                  className={field}
+                  autoComplete="email"
+                />
               </div>
               <div>
                 <Label htmlFor="p-company">Company</Label>
-                <input id="p-company" className={field} autoComplete="organization" />
+                <input
+                  id="p-company"
+                  name="p-company"
+                  defaultValue={profile?.company ?? ""}
+                  className={field}
+                  autoComplete="organization"
+                />
               </div>
               <div>
                 <Label htmlFor="p-naics">Primary NAICS</Label>
-                <input id="p-naics" placeholder="541512" className={field} />
+                <input
+                  id="p-naics"
+                  name="p-naics"
+                  defaultValue={profile?.naicsCodes ?? ""}
+                  placeholder="541512"
+                  className={field}
+                />
               </div>
-              <div className="sm:col-span-2">
-                <Button variant="accent" type="submit">
-                  Save changes
+              <div className="sm:col-span-2 flex items-center gap-3">
+                <Button variant="accent" type="submit" disabled={saving}>
+                  {saving ? "Saving…" : "Save changes"}
                 </Button>
+                <span aria-live="polite" className="text-sm text-muted-foreground">
+                  {savedMessage}
+                </span>
               </div>
             </form>
           </Panel>
@@ -118,18 +194,12 @@ function SettingsPage() {
           <Panel title="Billing">
             <div className="rounded-xl border border-border p-5">
               <p className="text-sm text-muted-foreground">Current plan</p>
-              <p className="mt-1 text-lg font-semibold">Free</p>
+              <p className="mt-1 text-lg font-semibold capitalize">{profile?.plan ?? "Free"}</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Upgrade to {professional.name} for {professional.limits.alerts.toLowerCase()}{" "}
-                alerts, unlimited AI analysis and exports.
+                Paid plans are not available yet — everyone is on the free tier while we finish
+                billing.
               </p>
-              <Button variant="accent" className="mt-4">
-                Upgrade plan
-              </Button>
             </div>
-            <PlaceholderNote className="mt-5">
-              Payment method and invoice history appear here once billing is connected.
-            </PlaceholderNote>
           </Panel>
         </TabsContent>
 
@@ -147,7 +217,8 @@ function SettingsPage() {
                   <Switch
                     id={pref.id}
                     className="ml-auto mt-1"
-                    defaultChecked={pref.id !== "browser"}
+                    checked={profile?.notificationPrefs?.[pref.id] ?? false}
+                    onCheckedChange={(value) => void savePrefs(pref.id, value)}
                   />
                 </li>
               ))}

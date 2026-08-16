@@ -3,6 +3,7 @@ import { Mail, MessagesSquare, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { submitContactMessage } from "@/modules/opportunities/remote";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -27,6 +28,7 @@ const field =
 
 function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
   return (
     <div className="container-page grid gap-12 py-16 lg:grid-cols-12">
@@ -64,27 +66,48 @@ function ContactPage() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            setSent(true);
+            const form = e.currentTarget;
+            const data = new FormData(form);
+            setError("");
+            void submitContactMessage({
+              name: String(data.get("name") ?? ""),
+              email: String(data.get("email") ?? ""),
+              topic: String(data.get("company") ?? ""),
+              message: String(data.get("message") ?? ""),
+            })
+              .then(() => {
+                setSent(true);
+                form.reset();
+              })
+              .catch(() => setError("Something went wrong. Please email us instead."));
           }}
           className="rounded-2xl border border-border bg-card p-7 shadow-subtle"
         >
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <Label htmlFor="name">Full name</Label>
-              <input id="name" required className={field} autoComplete="name" />
+              <input id="name" name="name" required className={field} autoComplete="name" />
             </div>
             <div>
               <Label htmlFor="email">Work email</Label>
-              <input id="email" type="email" required className={field} autoComplete="email" />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                className={field}
+                autoComplete="email"
+              />
             </div>
             <div className="sm:col-span-2">
               <Label htmlFor="company">Company</Label>
-              <input id="company" className={field} autoComplete="organization" />
+              <input id="company" name="company" className={field} autoComplete="organization" />
             </div>
             <div className="sm:col-span-2">
               <Label htmlFor="message">How can we help?</Label>
               <textarea
                 id="message"
+                name="message"
                 required
                 rows={5}
                 className="mt-1.5 w-full rounded-lg border border-border bg-background p-3 text-sm outline-none focus:border-accent"
@@ -95,7 +118,10 @@ function ContactPage() {
             Send message
           </Button>
           <p aria-live="polite" className="mt-3 text-sm text-success">
-            {sent ? "Thanks — your message has been queued for our team." : ""}
+            {sent ? "Thanks — we have your message and will be in touch." : ""}
+          </p>
+          <p aria-live="polite" className="mt-1 text-sm text-destructive">
+            {error}
           </p>
         </form>
       </div>

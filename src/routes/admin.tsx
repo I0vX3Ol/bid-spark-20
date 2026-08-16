@@ -14,10 +14,12 @@ import {
 import { PlaceholderNote } from "@/components/common/PlaceholderNote";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { sampleOpportunities } from "@/modules/opportunities/data";
+import { fetchOpportunities } from "@/modules/opportunities/remote";
+import type { Opportunity } from "@/modules/opportunities/types";
 import { formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/admin")({
+  loader: () => fetchOpportunities(),
   head: () => ({
     meta: [
       { title: "Admin Console | GovScout" },
@@ -64,6 +66,8 @@ const modules = [
 ];
 
 function AdminPage() {
+  const opportunities = Route.useLoaderData() as Opportunity[];
+
   return (
     <div className="container-page py-10">
       <div className="flex flex-wrap items-center gap-3">
@@ -113,7 +117,7 @@ function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {sampleOpportunities.map((o) => (
+              {opportunities.map((o) => (
                 <tr key={o.id} className="border-t border-border">
                   <td className="max-w-xs truncate p-3">{o.title}</td>
                   <td className="p-3 text-muted-foreground">{o.agency}</td>

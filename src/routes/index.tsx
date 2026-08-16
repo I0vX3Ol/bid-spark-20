@@ -18,9 +18,11 @@ import { OpportunityCard } from "@/components/opportunities/OpportunityCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { products, siteConfig } from "@/config/site";
-import { sampleOpportunities } from "@/modules/opportunities/data";
+import { fetchOpportunities } from "@/modules/opportunities/remote";
+import type { Opportunity } from "@/modules/opportunities/types";
 
 export const Route = createFileRoute("/")({
+  loader: () => fetchOpportunities(),
   head: () => ({
     meta: [
       { title: "Search Every Government Contract | GovScout Contracts Intelligence" },
@@ -97,7 +99,7 @@ const steps = [
 function Index() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
-  const featured = sampleOpportunities.slice(0, 3);
+  const featured = (Route.useLoaderData() as Opportunity[]).slice(0, 3);
 
   return (
     <>
