@@ -111,12 +111,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const organizationJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteConfig.name,
+  url: siteConfig.domain,
+  description: siteConfig.description,
+});
+
+const websiteJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: siteConfig.name,
+  url: siteConfig.domain,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${siteConfig.domain}/search?q={search_term_string}`,
+    "query-input": "required name=search_term_string",
+  },
+});
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: organizationJsonLd }}
+        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteJsonLd }} />
       </head>
       <body>
         {children}
