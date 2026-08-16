@@ -43,6 +43,7 @@ jobs:
           name: worker-build
           path: .output
           retention-days: 3
+          include-hidden-files: true
 
   deploy-production:
     name: Deploy to production
