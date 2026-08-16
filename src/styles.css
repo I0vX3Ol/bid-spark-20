@@ -85,7 +85,9 @@
   --secondary-foreground: oklch(0.28 0.062 262);
   --muted: oklch(0.955 0.008 260);
   --muted-foreground: oklch(0.52 0.025 260);
-  --accent: oklch(0.55 0.17 254); /* darkened from 0.58 for WCAG AA (4.5:1) on white + as button/link text */
+  --accent: oklch(
+    0.55 0.17 254
+  ); /* darkened from 0.58 for WCAG AA (4.5:1) on white + as button/link text */
   --accent-foreground: oklch(0.99 0.004 260);
 
   --success: oklch(0.58 0.13 158);

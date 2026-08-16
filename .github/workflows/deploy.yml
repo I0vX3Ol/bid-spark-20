@@ -1,0 +1,117 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Lint, typecheck, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun x tsc --noEmit
+
+      - name: Build
+        run: bun run build
+
+      - name: Audit dependencies
+        run: bun audit
+        continue-on-error: true
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-build
+          path: .output
+          retention-days: 3
+
+  deploy-production:
+    name: Deploy to production
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://govscout.nexudel.com
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: worker-build
+          path: .output
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: .output/server
+          command: deploy --config wrangler.json
+
+  deploy-preview:
+    name: Deploy PR preview
+    needs: build
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: worker-build
+          path: .output
+
+      - name: Upload preview version
+        id: preview
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: .output/server
+          command: versions upload --config wrangler.json --preview-alias pr-${{ github.event.number }}
+
+      - name: Comment preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `${{ steps.preview.outputs.command-output }}`;
+            const match = output.match(/https:\/\/[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev\S*/i);
+            const url = match ? match[0] : "(preview URL not found in wrangler output — check the Action log)";
+            const body = `**Preview deployed:** ${url}\n\nThis is a non-production version upload — it does not affect the live site.`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.user.type === "Bot" && c.body.startsWith("**Preview deployed:**"));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body });
+            }

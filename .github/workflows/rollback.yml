@@ -1,0 +1,38 @@
+name: Rollback production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_id:
+        description: "Cloudflare Worker version ID to roll back to (leave blank to roll back to the previous deployment). Find IDs with: wrangler deployments list"
+        required: false
+        default: ""
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build (needed for wrangler.json)
+        run: bun run build
+
+      - name: Rollback
+        working-directory: .output/server
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "${{ github.event.inputs.version_id }}" ]; then
+            npx wrangler rollback ${{ github.event.inputs.version_id }} --config wrangler.json
+          else
+            npx wrangler rollback --config wrangler.json
+          fi
