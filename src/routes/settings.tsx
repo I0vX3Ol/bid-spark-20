@@ -11,6 +11,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { fetchProfile, updateProfile } from "@/modules/opportunities/remote";
 import type { GovProfile } from "@/modules/opportunities/remote";
 import { useEffect, useState } from "react";
+import { BillingPanel } from "@/components/billing/billing-panel";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -192,14 +193,7 @@ function SettingsPage() {
 
         <TabsContent value="billing" className="mt-6">
           <Panel title="Billing">
-            <div className="rounded-xl border border-border p-5">
-              <p className="text-sm text-muted-foreground">Current plan</p>
-              <p className="mt-1 text-lg font-semibold capitalize">{profile?.plan ?? "Free"}</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Paid plans are not available yet — everyone is on the free tier while we finish
-                billing.
-              </p>
-            </div>
+            <BillingPanel />
           </Panel>
         </TabsContent>
 

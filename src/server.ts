@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { routeBilling, type BillingEnv } from "./server/billing/handlers";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -80,6 +81,12 @@ function withSecurityHeaders(response: Response): Response {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      // Stripe endpoints are handled before the SSR router. They need the raw
+      // request body and the Worker's secret bindings, neither of which survive
+      // a trip through TanStack Start's server-function RPC layer.
+      const billing = routeBilling(request, (env ?? {}) as BillingEnv);
+      if (billing) return withSecurityHeaders(await billing);
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response));
