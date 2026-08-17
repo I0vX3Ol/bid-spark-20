@@ -1,0 +1,39 @@
+# Keeps the shared Supabase project awake.
+#
+# Free-plan projects pause after 7 days with no activity, which would take
+# BuildFlow, ProcureAI and GovScout offline at once — they all share project
+# xdbbxtobsenyrxgsazsc. A single read per day is enough to count as activity,
+# so this only needs to live in one of the three repos.
+#
+# The key below is the publishable (anon) key. It is designed to be public and
+# already ships in the browser bundle, so it is not a secret. Row-level
+# security is what protects the data, not this key.
+#
+# NOTE: GitHub disables scheduled workflows on repositories with no commits for
+# 60 days. If this repo goes quiet, re-enable the schedule from the Actions tab.
+
+name: Supabase keepalive
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # 06:17 UTC daily
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read one row from the public opportunities view
+        run: |
+          status=$(curl -sS -o /tmp/body -w '%{http_code}' \
+            -H "apikey: sb_publishable_OtZj4Ei_IBVG91BfD7DhUQ_Yg5V14NM" \
+            -H "Accept: application/json" \
+            "https://xdbbxtobsenyrxgsazsc.supabase.co/rest/v1/govscout_opportunities?select=id&limit=1")
+
+          echo "HTTP $status"
+          cat /tmp/body
+
+          if [ "$status" != "200" ]; then
+            echo "::error::Supabase keepalive failed with HTTP $status"
+            exit 1
+          fi
