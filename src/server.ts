@@ -78,13 +78,32 @@ function withSecurityHeaders(response: Response): Response {
   });
 }
 
+/**
+ * Cloudflare bindings (secrets) for the current request.
+ *
+ * Nitro's Cloudflare entry does `globalThis.__env__ = env` and then calls the
+ * app with the request alone — the `env` argument never reaches this handler,
+ * so reading it directly yields undefined and every binding looks unset. The
+ * stash is the supported way to get at them from inside the app.
+ *
+ * Falls back to the argument in case a future Nitro version starts forwarding
+ * it, and to an empty object so a missing binding is a clean 503 rather than a
+ * crash.
+ */
+function resolveEnv(passed: unknown): BillingEnv {
+  const stashed = (globalThis as { __env__?: unknown }).__env__;
+  const candidate =
+    passed && typeof passed === "object" && Object.keys(passed).length > 0 ? passed : stashed;
+  return (candidate ?? {}) as BillingEnv;
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       // Stripe endpoints are handled before the SSR router. They need the raw
       // request body and the Worker's secret bindings, neither of which survive
       // a trip through TanStack Start's server-function RPC layer.
-      const billing = routeBilling(request, (env ?? {}) as BillingEnv);
+      const billing = routeBilling(request, resolveEnv(env));
       if (billing) return withSecurityHeaders(await billing);
 
       const handler = await getServerEntry();
