@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # Lets a deploy be re-run by hand — needed after rotating a secret, since
+  # secrets are read at run time and otherwise only a new commit picks them up.
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
