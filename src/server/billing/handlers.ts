@@ -17,7 +17,9 @@
 
 import {
   createCheckoutSession,
+  createPortalSession,
   retrieveSubscription,
+  setCancelAtPeriodEnd,
   verifyWebhookSignature,
   type StripeCheckoutSessionCompleted,
   type StripeEnv,
@@ -269,6 +271,106 @@ export async function handleWebhook(request: Request, env: BillingEnv): Promise<
 }
 
 /* -------------------------------------------------------------------------- */
+/*                     POST /cancel, /resume, /portal                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The caller's current subscription, read server-side.
+ *
+ * Ownership is established here rather than trusting a subscription id from the
+ * request body — otherwise anyone could cancel anyone else's subscription by
+ * guessing an id.
+ */
+async function currentSubscriptionFor(
+  env: BillingEnv,
+  userId: string,
+): Promise<{ stripe_subscription_id: string; stripe_customer_id: string } | null> {
+  const res = await db(
+    env,
+    `subscriptions?user_id=eq.${encodeURIComponent(userId)}&select=stripe_subscription_id,stripe_customer_id&order=created_at.desc&limit=1`,
+  );
+  if (!res.ok) return null;
+  const rows = (await res.json()) as Array<{
+    stripe_subscription_id?: string;
+    stripe_customer_id?: string;
+  }>;
+  const row = rows[0];
+  if (!row?.stripe_subscription_id || !row.stripe_customer_id) return null;
+  return {
+    stripe_subscription_id: row.stripe_subscription_id,
+    stripe_customer_id: row.stripe_customer_id,
+  };
+}
+
+/** Shared auth + ownership resolution for the post-purchase endpoints. */
+async function requireSubscriber(
+  request: Request,
+  env: BillingEnv,
+): Promise<
+  | { ok: true; sub: { stripe_subscription_id: string; stripe_customer_id: string } }
+  | { ok: false; response: Response }
+> {
+  if (!env.STRIPE_SECRET_KEY || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error("Billing is not configured: missing Stripe or Supabase env bindings.");
+    return { ok: false, response: json({ error: "Billing is not configured." }, 503) };
+  }
+
+  const auth = request.headers.get("authorization");
+  const token = auth?.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : null;
+  if (!token) return { ok: false, response: json({ error: "Not signed in." }, 401) };
+
+  const user = await getUserFromToken(env, token);
+  if (!user) return { ok: false, response: json({ error: "Not signed in." }, 401) };
+
+  const sub = await currentSubscriptionFor(env, user.id);
+  if (!sub) return { ok: false, response: json({ error: "No subscription to manage." }, 404) };
+
+  return { ok: true, sub };
+}
+
+/** Cancels at period end, or clears a pending cancellation. */
+export async function handleCancelOrResume(
+  request: Request,
+  env: BillingEnv,
+  cancel: boolean,
+): Promise<Response> {
+  const gate = await requireSubscriber(request, env);
+  if (!gate.ok) return gate.response;
+
+  try {
+    await setCancelAtPeriodEnd(env.STRIPE_SECRET_KEY!, gate.sub.stripe_subscription_id, cancel);
+    // Stripe emits customer.subscription.updated, which the webhook writes to
+    // the database. We deliberately do not write here as well — one writer
+    // keeps the row an accurate mirror of Stripe.
+    return json({ ok: true, cancel_at_period_end: cancel });
+  } catch (error) {
+    console.error("Subscription update failed", error);
+    return json({ error: "Could not update your subscription." }, 502);
+  }
+}
+
+/** Billing portal, for card updates and invoice history. */
+export async function handlePortal(request: Request, env: BillingEnv): Promise<Response> {
+  const gate = await requireSubscriber(request, env);
+  if (!gate.ok) return gate.response;
+
+  const origin = env.APP_ORIGIN ?? new URL(request.url).origin;
+
+  try {
+    const session = await createPortalSession(
+      env.STRIPE_SECRET_KEY!,
+      gate.sub.stripe_customer_id,
+      `${origin}/settings`,
+    );
+    return json({ url: session.url });
+  } catch (error) {
+    // Most likely cause: the portal has never been activated in the Dashboard.
+    console.error("Portal session creation failed", error);
+    return json({ error: "The billing portal is not available yet. Please contact support." }, 502);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
 /*                                  Router                                    */
 /* -------------------------------------------------------------------------- */
 
@@ -283,6 +385,24 @@ export function routeBilling(request: Request, env: BillingEnv): Promise<Respons
       );
     }
     return handleCheckout(request, env);
+  }
+
+  if (pathname === "/api/billing/cancel" || pathname === "/api/billing/resume") {
+    if (request.method !== "POST") {
+      return Promise.resolve(
+        new Response("Method Not Allowed", { status: 405, headers: { Allow: "POST" } }),
+      );
+    }
+    return handleCancelOrResume(request, env, pathname.endsWith("/cancel"));
+  }
+
+  if (pathname === "/api/billing/portal") {
+    if (request.method !== "POST") {
+      return Promise.resolve(
+        new Response("Method Not Allowed", { status: 405, headers: { Allow: "POST" } }),
+      );
+    }
+    return handlePortal(request, env);
   }
 
   if (pathname === "/api/billing/webhook") {

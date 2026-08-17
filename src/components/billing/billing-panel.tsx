@@ -3,7 +3,14 @@ import { Link } from "@tanstack/react-router";
 import { Check, ExternalLink, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { startCheckout, useSubscription } from "@/lib/subscription";
+import {
+  cancelSubscription,
+  openBillingPortal,
+  resumeSubscription,
+  startCheckout,
+  useCheckoutReturn,
+  useSubscription,
+} from "@/lib/subscription";
 import type { Interval } from "@/lib/plans";
 
 /**
@@ -35,9 +42,35 @@ const PRO_FEATURES = [
 
 export function BillingPanel() {
   const { subscription, loading, entitled, plan } = useSubscription();
+  const { settling } = useCheckoutReturn();
   const [interval, setInterval] = useState<Interval>("year");
   const [pending, setPending] = useState(false);
+  const [busy, setBusy] = useState<"cancel" | "resume" | "portal" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const run = async (kind: "cancel" | "resume" | "portal") => {
+    setError(null);
+    setNotice(null);
+    setBusy(kind);
+    try {
+      if (kind === "portal") {
+        await openBillingPortal();
+        return;
+      }
+      if (kind === "cancel") {
+        await cancelSubscription();
+        setNotice("Your plan will end when the current period does. You keep access until then.");
+      } else {
+        await resumeSubscription();
+        setNotice("Your subscription will continue as normal.");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setBusy(null);
+    }
+  };
 
   const onUpgrade = async () => {
     setError(null);
@@ -93,6 +126,43 @@ export function BillingPanel() {
                 Free includes the full opportunity index, 3 saved searches and 10 AI summaries a
                 month.
               </p>
+            )}
+
+            {settling && (
+              <p role="status" className="mt-3 text-sm text-muted-foreground">
+                Payment received — activating your subscription. This usually takes a few seconds.
+              </p>
+            )}
+
+            {notice && (
+              <p role="status" className="mt-3 text-sm font-medium">
+                {notice}
+              </p>
+            )}
+
+            {entitled && subscription && (
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Button variant="outline" disabled={busy !== null} onClick={() => run("portal")}>
+                  {busy === "portal" ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                      Opening…
+                    </>
+                  ) : (
+                    "Manage payment method"
+                  )}
+                </Button>
+
+                {subscription.cancel_at_period_end ? (
+                  <Button variant="outline" disabled={busy !== null} onClick={() => run("resume")}>
+                    {busy === "resume" ? "Resuming…" : "Resume subscription"}
+                  </Button>
+                ) : (
+                  <Button variant="ghost" disabled={busy !== null} onClick={() => run("cancel")}>
+                    {busy === "cancel" ? "Cancelling…" : "Cancel subscription"}
+                  </Button>
+                )}
+              </div>
             )}
           </>
         )}

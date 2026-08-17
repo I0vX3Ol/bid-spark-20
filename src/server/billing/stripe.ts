@@ -241,3 +241,44 @@ export async function retrieveSubscription(
 
   return (await res.json()) as StripeSubscription;
 }
+
+/**
+ * Sets or clears `cancel_at_period_end` on a subscription.
+ *
+ * Cancelling at period end rather than immediately is deliberate: the customer
+ * has paid for the current period, so they keep access until it runs out. The
+ * resulting `customer.subscription.updated` event flows back through the
+ * webhook and updates our row, so the database stays Stripe's mirror rather
+ * than a second source of truth we have to keep in step by hand.
+ */
+export function setCancelAtPeriodEnd(
+  secretKey: string,
+  subscriptionId: string,
+  cancelAtPeriodEnd: boolean,
+): Promise<StripeSubscription> {
+  return stripeRequest<StripeSubscription>(secretKey, `/subscriptions/${subscriptionId}`, {
+    cancel_at_period_end: cancelAtPeriodEnd,
+  });
+}
+
+export type PortalSession = { id: string; url: string };
+
+/**
+ * Creates a Stripe Billing Portal session for updating cards and reading
+ * invoices.
+ *
+ * Requires the portal to have been activated once in the Stripe Dashboard
+ * (Settings -> Billing -> Customer portal). Until then Stripe returns an error,
+ * which the handler surfaces as a clear message rather than a stack trace —
+ * cancelling does not depend on the portal, so the rest of billing still works.
+ */
+export function createPortalSession(
+  secretKey: string,
+  customerId: string,
+  returnUrl: string,
+): Promise<PortalSession> {
+  return stripeRequest<PortalSession>(secretKey, "/billing_portal/sessions", {
+    customer: customerId,
+    return_url: returnUrl,
+  });
+}

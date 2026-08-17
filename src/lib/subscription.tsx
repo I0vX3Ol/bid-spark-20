@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import {
@@ -97,4 +98,68 @@ export async function startCheckout(
   }
 
   window.location.assign(body.url);
+}
+
+/** POSTs to a billing endpoint with the caller's access token. */
+async function billingAction<T = unknown>(path: string): Promise<T> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error("Please sign in again to continue.");
+
+  const res = await fetch(path, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}` },
+  });
+
+  const body = (await res.json().catch(() => ({}))) as { error?: string } & Record<string, unknown>;
+  if (!res.ok) throw new Error(body.error ?? "Something went wrong. Please try again.");
+  return body as T;
+}
+
+/** Cancels at the end of the paid period — access continues until then. */
+export const cancelSubscription = () => billingAction("/api/billing/cancel");
+
+/** Clears a pending cancellation. */
+export const resumeSubscription = () => billingAction("/api/billing/resume");
+
+/** Opens the Stripe Billing Portal for card updates and invoices. */
+export async function openBillingPortal(): Promise<void> {
+  const { url } = await billingAction<{ url: string }>("/api/billing/portal");
+  window.location.assign(url);
+}
+
+/**
+ * Refreshes subscription state after returning from Stripe Checkout.
+ *
+ * The webhook is asynchronous, so the row often does not exist yet at the
+ * moment the browser lands back on the success URL. Without this the customer
+ * sees "no subscription" straight after paying and reasonably concludes the
+ * payment failed. Polls briefly until the subscription appears, then stops.
+ */
+export function useCheckoutReturn(): { settling: boolean } {
+  const queryClient = useQueryClient();
+  const { subscription, entitled } = useSubscription();
+
+  const isReturn =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("checkout") === "success";
+
+  const settling = isReturn && !entitled;
+
+  useEffect(() => {
+    if (!isReturn || entitled) return;
+
+    let attempts = 0;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      void queryClient.invalidateQueries({ queryKey: ["subscription"] });
+      // ~20s is comfortably longer than a healthy webhook round trip; past that
+      // something is wrong and polling forever would just spin.
+      if (attempts >= 10) window.clearInterval(timer);
+    }, 2000);
+
+    return () => window.clearInterval(timer);
+  }, [isReturn, entitled, subscription, queryClient]);
+
+  return { settling };
 }
