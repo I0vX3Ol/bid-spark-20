@@ -45,6 +45,24 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+/**
+ * The Supabase origin this build talks to, in a form the CSP can use.
+ *
+ * Vite inlines VITE_* vars at build time, so this resolves to a literal in the
+ * bundle. Returns both the https origin and its wss equivalent, because
+ * Supabase Realtime opens a WebSocket that connect-src also governs.
+ */
+const SUPABASE_CONNECT_SRC = (() => {
+  const raw = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
+  if (!raw) return "";
+  try {
+    const { origin } = new URL(raw);
+    return `${origin} ${origin.replace(/^https:/, "wss:")}`;
+  } catch {
+    return "";
+  }
+})();
+
 const SECURITY_HEADERS: Record<string, string> = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   "X-Content-Type-Options": "nosniff",
@@ -54,13 +72,22 @@ const SECURITY_HEADERS: Record<string, string> = {
     "geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()",
   "Content-Security-Policy": [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline'",
+    // Cloudflare injects its analytics beacon into the response; without this
+    // the browser blocks it and logs a CSP violation on every page load.
+    "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https:",
     "font-src 'self' data: https://fonts.gstatic.com",
-    "connect-src 'self'",
+    // Supabase is a different origin, so 'self' alone blocks every auth call
+    // and every data read — which silently made the whole app unusable.
+    // Derived from the configured URL rather than hardcoded, so it cannot
+    // drift out of step with VITE_SUPABASE_URL, and scoped to that one project
+    // rather than a *.supabase.co wildcard.
+    `connect-src 'self' ${SUPABASE_CONNECT_SRC} https://cloudflareinsights.com`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
+    // Stripe Checkout is a top-level redirect, not a form post, so it needs no
+    // form-action entry here.
     "form-action 'self'",
     "object-src 'none'",
   ].join("; "),
