@@ -16,6 +16,7 @@
  */
 
 import {
+  StripeError,
   createCheckoutSession,
   createPortalSession,
   retrieveSubscription,
@@ -153,7 +154,19 @@ export async function handleCheckout(request: Request, env: BillingEnv): Promise
     return json({ url: session.url });
   } catch (error) {
     console.error("Checkout session creation failed", error);
-    return json({ error: "Could not start checkout." }, 502);
+    // Surface Stripe's classification so a failure here is diagnosable from
+    // the response alone. These are documented enum values and a field name —
+    // never the message, which can carry account detail.
+    const detail =
+      error instanceof StripeError
+        ? {
+            stripe_status: error.status,
+            stripe_type: error.stripeType,
+            stripe_code: error.stripeCode,
+            stripe_param: error.stripeParam,
+          }
+        : {};
+    return json({ error: "Could not start checkout.", ...detail }, 502);
   }
 }
 

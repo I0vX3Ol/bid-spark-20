@@ -43,6 +43,17 @@ export class StripeError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    /**
+     * Stripe's own error classification. `type`, `code` and `param` are
+     * documented enum/field names, not account data, so they are safe to
+     * surface to the caller — and `param` names the exact offending field,
+     * which is the difference between a debuggable failure and a dead end.
+     * `message` is deliberately NOT carried here: it can contain account
+     * detail and stays in the server log.
+     */
+    readonly stripeType?: string,
+    readonly stripeCode?: string,
+    readonly stripeParam?: string,
   ) {
     super(message);
     this.name = "StripeError";
@@ -70,12 +81,27 @@ async function stripeRequest<T>(
     body: toFormBody(body).toString(),
   });
 
-  const json = (await res.json()) as { error?: { message?: string } };
+  const json = (await res.json()) as {
+    error?: { message?: string; type?: string; code?: string; param?: string };
+  };
 
   if (!res.ok) {
     // Stripe's message can contain account detail; log it, don't return it.
-    console.error("Stripe API error", res.status, json.error?.message);
-    throw new StripeError("Stripe request failed", res.status);
+    console.error(
+      "Stripe API error",
+      res.status,
+      json.error?.type,
+      json.error?.code,
+      json.error?.param,
+      json.error?.message,
+    );
+    throw new StripeError(
+      "Stripe request failed",
+      res.status,
+      json.error?.type,
+      json.error?.code,
+      json.error?.param,
+    );
   }
 
   return json as T;
