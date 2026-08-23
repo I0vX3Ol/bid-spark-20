@@ -26,7 +26,7 @@ import {
   type StripeEvent,
   type StripeSubscription,
 } from "./stripe";
-import { APP_KEY, STATEMENT_DESCRIPTOR_SUFFIX, isInterval, isPurchasablePlan } from "@/lib/plans";
+import { APP_KEY, isInterval, isPurchasablePlan } from "@/lib/plans";
 import { planForPriceId, priceIdFor, type PlanEnv } from "./plans";
 
 export type BillingEnv = StripeEnv &
@@ -146,7 +146,6 @@ export async function handleCheckout(request: Request, env: BillingEnv): Promise
       customerEmail: user.email,
       successUrl: `${origin}/settings?checkout=success`,
       cancelUrl: `${origin}/pricing?checkout=cancelled`,
-      statementDescriptorSuffix: STATEMENT_DESCRIPTOR_SUFFIX,
       metadata: { app: APP_KEY, user_id: user.id, plan, interval },
       idempotencyKey: `${user.id}:${plan}:${interval}:${Math.floor(Date.now() / 1000)}`,
     });

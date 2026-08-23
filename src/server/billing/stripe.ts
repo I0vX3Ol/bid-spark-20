@@ -91,8 +91,6 @@ export function createCheckoutSession(
     customerEmail?: string | undefined;
     successUrl: string;
     cancelUrl: string;
-    /** Shown on the card statement after the account prefix, e.g. NEXUDEL* GOVSCOUT */
-    statementDescriptorSuffix: string;
     /** Echoed back on the webhook so we can attach the sub to the right tenant. */
     metadata: Record<string, string>;
     idempotencyKey?: string | undefined;
@@ -117,8 +115,12 @@ export function createCheckoutSession(
       metadata: params.metadata,
       subscription_data: {
         metadata: params.metadata,
-        // Per-app suffix so a customer can tell which product charged them.
-        statement_descriptor: params.statementDescriptorSuffix,
+        // NOTE: `subscription_data.statement_descriptor` is NOT a valid Checkout
+        // Session parameter — Stripe rejects it with
+        // `parameter_unknown: subscription_data[statement_descriptor]`, which
+        // failed every checkout this app ever attempted. For subscriptions the
+        // descriptor is configured on the Stripe Product itself, not per
+        // session. See STATEMENT_DESCRIPTOR_SUFFIX in lib/plans.ts.
       },
       allow_promotion_codes: true,
     },
