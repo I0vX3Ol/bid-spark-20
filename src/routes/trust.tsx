@@ -1,23 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Activity, KeyRound, Lock, ScrollText } from "lucide-react";
 import { PlaceholderNote } from "@/components/common/PlaceholderNote";
 import { SectionHeading } from "@/components/common/SectionHeading";
 
 export const Route = createFileRoute("/trust")({
-  head: () => ({
-    meta: [
-      { title: "Trust, Security and Compliance | GovScout" },
-      {
-        name: "description",
-        content:
-          "How GovScout handles data security, access control, availability and compliance commitments for procurement teams.",
-      },
-      { property: "og:title", content: "GovScout Trust Center" },
-      { property: "og:description", content: "Security, availability and compliance posture." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/trust",
+      title: "Trust, Security and Compliance | GovScout",
+      description:
+        "How GovScout handles data security, access control, availability and compliance commitments for procurement teams.",
+      ogTitle: "GovScout Trust Center",
+      ogDescription: "Security, availability and compliance posture.",
+    }),
   component: TrustPage,
 });
 

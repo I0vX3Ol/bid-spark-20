@@ -1,20 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/legal/privacy")({
-  head: () => ({
-    meta: [
-      { title: "Privacy Policy | GovScout" },
-      {
-        name: "description",
-        content:
-          "How GovScout collects, uses, stores and protects personal information for account holders and site visitors.",
-      },
-      { property: "og:title", content: "GovScout Privacy Policy" },
-      { property: "og:description", content: "Our approach to personal data and privacy." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/legal/privacy",
+      title: "Privacy Policy | GovScout",
+      description:
+        "How GovScout collects, uses, stores and protects personal information for account holders and site visitors.",
+      ogTitle: "GovScout Privacy Policy",
+      ogDescription: "Our approach to personal data and privacy.",
+    }),
   component: PrivacyPage,
 });
 

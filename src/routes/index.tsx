@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import {
   ArrowRight,
   Bell,
@@ -23,24 +24,16 @@ import type { Opportunity } from "@/modules/opportunities/types";
 
 export const Route = createFileRoute("/")({
   loader: () => fetchOpportunities(),
-  head: () => ({
-    meta: [
-      { title: "Search Every Government Contract | GovScout Contracts Intelligence" },
-      {
-        name: "description",
-        content:
-          "Search federal, state and local contracting opportunities in one place. AI summaries, intelligent filters, personalized alerts and opportunity intelligence.",
-      },
-      { property: "og:title", content: "Search Every Government Contract | GovScout" },
-      {
-        property: "og:description",
-        content:
-          "One searchable index of government contracting opportunities, with AI summaries, filters and alerts.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/",
+      title: "Search Every Government Contract | GovScout Contracts Intelligence",
+      description:
+        "Search federal, state and local contracting opportunities in one place. AI summaries, intelligent filters, personalized alerts and opportunity intelligence.",
+      ogTitle: "Search Every Government Contract | GovScout",
+      ogDescription:
+        "One searchable index of government contracting opportunities, with AI summaries, filters and alerts.",
+    }),
   component: Index,
 });
 

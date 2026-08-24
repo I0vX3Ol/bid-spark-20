@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/common/SectionHeading";
 import { Badge } from "@/components/ui/badge";
@@ -6,23 +7,15 @@ import { Button } from "@/components/ui/button";
 import { products } from "@/config/site";
 
 export const Route = createFileRoute("/products")({
-  head: () => ({
-    meta: [
-      { title: "Products — Public Sector Intelligence Suite | GovScout" },
-      {
-        name: "description",
-        content:
-          "Contracts Intelligence is live today. Grants, permits, inspections and public records intelligence share the same platform, account and design system.",
-      },
-      { property: "og:title", content: "GovScout Product Suite" },
-      {
-        property: "og:description",
-        content: "One platform for contracts, grants, permits and public record intelligence.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/products",
+      title: "Products — Public Sector Intelligence Suite | GovScout",
+      description:
+        "Contracts Intelligence is live today. Grants, permits, inspections and public records intelligence share the same platform, account and design system.",
+      ogTitle: "GovScout Product Suite",
+      ogDescription: "One platform for contracts, grants, permits and public record intelligence.",
+    }),
   component: ProductsPage,
 });
 

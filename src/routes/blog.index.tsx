@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { useState } from "react";
 import { SectionHeading } from "@/components/common/SectionHeading";
 import { Badge } from "@/components/ui/badge";
@@ -8,23 +9,15 @@ import { blogCategories, blogPosts } from "@/modules/blog/data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/blog/")({
-  head: () => ({
-    meta: [
-      { title: "Government Contracting Blog — Guides and Analysis | GovScout" },
-      {
-        name: "description",
-        content:
-          "Practical guidance on federal contracting, SAM.gov, proposal writing, compliance and procurement strategy from the GovScout research team.",
-      },
-      { property: "og:title", content: "GovScout Blog" },
-      {
-        property: "og:description",
-        content: "Guides and analysis for government contracting teams.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/blog",
+      title: "Government Contracting Blog — Guides and Analysis | GovScout",
+      description:
+        "Practical guidance on federal contracting, SAM.gov, proposal writing, compliance and procurement strategy from the GovScout research team.",
+      ogTitle: "GovScout Blog",
+      ogDescription: "Guides and analysis for government contracting teams.",
+    }),
   component: BlogIndex,
 });
 

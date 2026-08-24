@@ -1,0 +1,41 @@
+<!--
+  Source for public/og-default.png, the Open Graph card every page shares.
+
+  Kept as SVG so the card can be edited as text rather than reopened in a design
+  tool. Regenerate the PNG after any change — Open Graph consumers do not render
+  SVG, so the PNG is the file that actually ships:
+
+    node scripts/build-og-image.mjs
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#172847"/>
+      <stop offset="100%" stop-color="#0F1828"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="8" fill="#0C71D1"/>
+
+  <!-- Logo mark: the same bar-chart glyph as the site header. -->
+  <rect x="96" y="150" width="96" height="96" rx="22" fill="#0C71D1"/>
+  <!-- The header glyph verbatim on its own 24x24 grid, transformed into place,
+       so the mark on the card and the mark in the nav cannot drift apart. -->
+  <g transform="translate(112.8 166.8) scale(2.6)">
+    <path d="M4 19V5l8 9V5m4 0v14"
+          fill="none" stroke="#F8FAFD" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="96" y="358" font-family="DejaVu Sans, Helvetica, Arial, sans-serif"
+        font-size="92" font-weight="700" fill="#F8FAFD" letter-spacing="-2">GovScout</text>
+
+  <text x="96" y="424" font-family="DejaVu Sans, Helvetica, Arial, sans-serif"
+        font-size="38" font-weight="500" fill="#7FB3E8">Contracts Intelligence</text>
+
+  <text x="96" y="502" font-family="DejaVu Sans, Helvetica, Arial, sans-serif"
+        font-size="30" font-weight="400" fill="#9AA6BC">Federal, state and local opportunities in one search.</text>
+
+  <rect x="96" y="540" width="150" height="4" rx="2" fill="#0C71D1"/>
+</svg>

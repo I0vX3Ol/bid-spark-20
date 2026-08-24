@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { Filter, Mic, Search as SearchIcon, Sparkles, X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
@@ -37,23 +38,15 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
   loader: () => fetchOpportunities(),
-  head: () => ({
-    meta: [
-      { title: "Search Government Contracting Opportunities | GovScout" },
-      {
-        name: "description",
-        content:
-          "Search federal, state and local contracting opportunities with advanced filters for agency, NAICS, set-aside, value and deadline.",
-      },
-      { property: "og:title", content: "Search Government Contracting Opportunities" },
-      {
-        property: "og:description",
-        content: "Advanced procurement search with AI summaries and intelligent filters.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/search",
+      title: "Search Government Contracting Opportunities | GovScout",
+      description:
+        "Search federal, state and local contracting opportunities with advanced filters for agency, NAICS, set-aside, value and deadline.",
+      ogTitle: "Search Government Contracting Opportunities",
+      ogDescription: "Advanced procurement search with AI summaries and intelligent filters.",
+    }),
   component: SearchPage,
 });
 

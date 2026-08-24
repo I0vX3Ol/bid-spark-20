@@ -1,23 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/docs")({
-  head: () => ({
-    meta: [
-      { title: "Documentation — Platform and API Reference | GovScout" },
-      {
-        name: "description",
-        content:
-          "How GovScout data is structured, how saved searches and alerts work, and how to access opportunity data programmatically.",
-      },
-      { property: "og:title", content: "GovScout Documentation" },
-      {
-        property: "og:description",
-        content: "Platform concepts, data schema and API reference for GovScout.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/docs",
+      title: "Documentation — Platform and API Reference | GovScout",
+      description:
+        "How GovScout data is structured, how saved searches and alerts work, and how to access opportunity data programmatically.",
+      ogTitle: "GovScout Documentation",
+      ogDescription: "Platform concepts, data schema and API reference for GovScout.",
+    }),
   component: DocsPage,
 });
 

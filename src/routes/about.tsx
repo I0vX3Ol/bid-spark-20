@@ -1,24 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { SectionHeading } from "@/components/common/SectionHeading";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About GovScout — Public Sector Intelligence" },
-      {
-        name: "description",
-        content:
-          "GovScout builds procurement intelligence software that makes public sector opportunity data searchable, understandable and actionable.",
-      },
-      { property: "og:title", content: "About GovScout" },
-      {
-        property: "og:description",
-        content: "Why we are building procurement intelligence for public sector bidders.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/about",
+      title: "About GovScout — Public Sector Intelligence",
+      description:
+        "GovScout builds procurement intelligence software that makes public sector opportunity data searchable, understandable and actionable.",
+      ogTitle: "About GovScout",
+      ogDescription: "Why we are building procurement intelligence for public sector bidders.",
+    }),
   component: AboutPage,
 });
 

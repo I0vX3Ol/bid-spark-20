@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/config/site";
 import { formatDate } from "@/lib/format";
+import { seo } from "@/lib/seo";
 import { getPost, relatedPosts } from "@/modules/blog/data";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -20,16 +21,16 @@ export const Route = createFileRoute("/blog/$slug")({
       };
     }
     const { post } = loaderData;
+    const base = seo({
+      path: `/blog/${post.slug}`,
+      title: `${post.title} | GovScout Blog`,
+      description: post.description,
+      ogTitle: post.title,
+      type: "article",
+    });
+
     return {
-      meta: [
-        { title: `${post.title} | GovScout Blog` },
-        { name: "description", content: post.description },
-        { property: "og:title", content: post.title },
-        { property: "og:description", content: post.description },
-        { property: "og:type", content: "article" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-      links: [{ rel: "canonical", href: `${siteConfig.domain}/blog/${post.slug}` }],
+      ...base,
       scripts: [
         {
           type: "application/ld+json",
@@ -38,7 +39,16 @@ export const Route = createFileRoute("/blog/$slug")({
             "@type": "BlogPosting",
             headline: post.title,
             description: post.description,
+            // Google's Article guidance treats the image as a required property
+            // and does not accept SVG; this is the same 1200x630 card the page
+            // shares on social.
+            image: [`${siteConfig.domain}/og-default.png`],
             datePublished: post.publishedAt,
+            dateModified: post.publishedAt,
+            mainEntityOfPage: {
+              "@type": "WebPage",
+              "@id": `${siteConfig.domain}/blog/${post.slug}`,
+            },
             author: { "@type": "Organization", name: post.author.name },
             publisher: { "@type": "Organization", name: siteConfig.name },
           }),

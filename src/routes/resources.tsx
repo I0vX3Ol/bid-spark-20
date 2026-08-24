@@ -1,25 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { BookOpen, FileText, GraduationCap, LifeBuoy } from "lucide-react";
 import { SectionHeading } from "@/components/common/SectionHeading";
 
 export const Route = createFileRoute("/resources")({
-  head: () => ({
-    meta: [
-      { title: "Resources for Government Contractors | GovScout" },
-      {
-        name: "description",
-        content:
-          "Guides, templates and reference material for federal, state and local contracting teams — from SAM.gov registration to proposal review.",
-      },
-      { property: "og:title", content: "GovScout Resources" },
-      {
-        property: "og:description",
-        content: "Practical guides and references for public sector capture teams.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/resources",
+      title: "Resources for Government Contractors | GovScout",
+      description:
+        "Guides, templates and reference material for federal, state and local contracting teams — from SAM.gov registration to proposal review.",
+      ogTitle: "GovScout Resources",
+      ogDescription: "Practical guides and references for public sector capture teams.",
+    }),
   component: ResourcesPage,
 });
 
