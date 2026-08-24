@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Mail, MessagesSquare, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -6,20 +7,15 @@ import { Label } from "@/components/ui/label";
 import { submitContactMessage } from "@/modules/opportunities/remote";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "Contact Sales and Support | GovScout" },
-      {
-        name: "description",
-        content:
-          "Talk to the GovScout team about Enterprise workspaces, API access, data coverage requests or account support.",
-      },
-      { property: "og:title", content: "Contact GovScout" },
-      { property: "og:description", content: "Reach sales, support or the security team." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/contact",
+      title: "Contact Sales and Support | GovScout",
+      description:
+        "Talk to the GovScout team about Enterprise workspaces, API access, data coverage requests or account support.",
+      ogTitle: "Contact GovScout",
+      ogDescription: "Reach sales, support or the security team.",
+    }),
   component: ContactPage,
 });
 

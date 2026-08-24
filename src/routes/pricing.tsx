@@ -1,27 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Check, Minus } from "lucide-react";
 import { FaqSection } from "@/components/marketing/FaqSection";
 import { PricingSection } from "@/components/marketing/PricingSection";
 import { plans } from "@/config/pricing";
 
 export const Route = createFileRoute("/pricing")({
-  head: () => ({
-    meta: [
-      { title: "Pricing — Procurement Intelligence Plans | GovScout" },
-      {
-        name: "description",
-        content:
-          "Compare GovScout plans: free opportunity search, Professional alerts and AI analysis, and Enterprise workspaces with API access and SSO.",
-      },
-      { property: "og:title", content: "GovScout Pricing" },
-      {
-        property: "og:description",
-        content: "Free, Professional and Enterprise plans for government contracting teams.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/pricing",
+      title: "Pricing — Procurement Intelligence Plans | GovScout",
+      description:
+        "Compare GovScout plans: free opportunity search, Professional alerts and AI analysis, and Enterprise workspaces with API access and SSO.",
+      ogTitle: "GovScout Pricing",
+      ogDescription: "Free, Professional and Enterprise plans for government contracting teams.",
+    }),
   component: PricingPage,
 });
 

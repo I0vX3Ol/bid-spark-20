@@ -1,20 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/legal/terms")({
-  head: () => ({
-    meta: [
-      { title: "Terms of Service | GovScout" },
-      {
-        name: "description",
-        content:
-          "The terms that govern use of the GovScout platform, including acceptable use, subscriptions and data accuracy disclaimers.",
-      },
-      { property: "og:title", content: "GovScout Terms of Service" },
-      { property: "og:description", content: "Terms governing use of the GovScout platform." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/legal/terms",
+      title: "Terms of Service | GovScout",
+      description:
+        "The terms that govern use of the GovScout platform, including acceptable use, subscriptions and data accuracy disclaimers.",
+      ogTitle: "GovScout Terms of Service",
+      ogDescription: "Terms governing use of the GovScout platform.",
+    }),
   component: TermsPage,
 });
 

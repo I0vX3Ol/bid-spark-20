@@ -12,4 +12,8 @@
   <url><loc>https://govscout.nexudel.com/trust</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>https://govscout.nexudel.com/legal/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://govscout.nexudel.com/legal/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://govscout.nexudel.com/blog/sam-gov-registration-checklist</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://govscout.nexudel.com/blog/reading-a-solicitation-fast</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://govscout.nexudel.com/blog/set-aside-types-explained</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://govscout.nexudel.com/blog/cmmc-readiness-for-small-contractors</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
