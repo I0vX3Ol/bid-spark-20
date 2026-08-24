@@ -21,6 +21,7 @@ import {
   createPortalSession,
   retrieveSubscription,
   setCancelAtPeriodEnd,
+  subscriptionPeriodEnd,
   verifyWebhookSignature,
   type StripeCheckoutSessionCompleted,
   type StripeEnv,
@@ -35,6 +36,12 @@ export type BillingEnv = StripeEnv &
     SUPABASE_URL?: string;
     /** Server-only. Bypasses RLS so the webhook can write subscription rows. */
     SUPABASE_SERVICE_ROLE_KEY?: string;
+    /**
+     * Public key, used only to satisfy the `apikey` header when asking Supabase
+     * to identify a bearer token. Validating a user's token needs no privilege
+     * of its own, so it should not be done with the service role.
+     */
+    SUPABASE_ANON_KEY?: string;
     /** Public origin, used to build success/cancel URLs. */
     APP_ORIGIN?: string;
   };
@@ -62,7 +69,10 @@ async function getUserFromToken(
   const res = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
     headers: {
       Authorization: `Bearer ${token}`,
-      apikey: env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+      // The bearer token is what authenticates the call; `apikey` only routes
+      // it. Falls back to the service role so an unset binding degrades to the
+      // previous behaviour rather than breaking sign-in.
+      apikey: env.SUPABASE_ANON_KEY ?? env.SUPABASE_SERVICE_ROLE_KEY ?? "",
     },
   });
 
@@ -148,7 +158,12 @@ export async function handleCheckout(request: Request, env: BillingEnv): Promise
       successUrl: `${origin}/settings?checkout=success`,
       cancelUrl: `${origin}/pricing?checkout=cancelled`,
       metadata: { app: APP_KEY, user_id: user.id, plan, interval },
-      idempotencyKey: `${user.id}:${plan}:${interval}:${Math.floor(Date.now() / 1000)}`,
+      // Bucketed to the minute rather than the second. A per-second bucket
+      // deduplicated only two clicks inside the same second, which is not the
+      // double-submit this is meant to catch; a minute covers a stalled request
+      // and a retry while still letting somebody start a genuinely new checkout
+      // shortly after abandoning one.
+      idempotencyKey: `${user.id}:${plan}:${interval}:${Math.floor(Date.now() / 60_000)}`,
     });
 
     return json({ url: session.url });
@@ -174,9 +189,20 @@ export async function handleCheckout(request: Request, env: BillingEnv): Promise
 /*                              POST /webhook                                 */
 /* -------------------------------------------------------------------------- */
 
-/** Writes the current state of one Stripe subscription into the database. */
+/**
+ * Writes the current state of one Stripe subscription into the database.
+ *
+ * Delegates to govscout.apply_subscription_event so that idempotency and
+ * ordering are decided inside one statement. Stripe retries deliveries and does
+ * not guarantee order, and a plain upsert honoured whichever event happened to
+ * arrive last — so a replay wrote twice and a late-arriving older
+ * `customer.subscription.updated` could resurrect a stale status over a newer
+ * one. The function drops duplicates by event id and ignores any event older
+ * than the one already reflected in the row.
+ */
 async function upsertSubscription(
   env: BillingEnv,
+  event: StripeEvent,
   sub: StripeSubscription,
   fallbackUserId?: string,
 ): Promise<void> {
@@ -188,30 +214,29 @@ async function upsertSubscription(
 
   const priceId = sub.items?.data?.[0]?.price?.id;
   const plan = planForPriceId(env, priceId) ?? sub.metadata?.["plan"] ?? "unknown";
+  const periodEnd = subscriptionPeriodEnd(sub);
 
-  const row = {
-    user_id: userId,
-    stripe_customer_id: sub.customer,
-    stripe_subscription_id: sub.id,
-    plan,
-    status: sub.status,
-    current_period_end: sub.current_period_end
-      ? new Date(sub.current_period_end * 1000).toISOString()
-      : null,
-    cancel_at_period_end: sub.cancel_at_period_end ?? false,
-    updated_at: new Date().toISOString(),
-  };
-
-  // Upsert on the natural key so replayed or out-of-order events converge on
-  // the same row instead of duplicating it.
-  const res = await db(env, "subscriptions?on_conflict=stripe_subscription_id", {
+  const res = await db(env, "rpc/apply_subscription_event", {
     method: "POST",
-    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
-    body: JSON.stringify(row),
+    body: JSON.stringify({
+      p_event_id: event.id,
+      p_event_type: event.type,
+      p_event_created: new Date(event.created * 1000).toISOString(),
+      p_user_id: userId,
+      p_customer_id: sub.customer,
+      p_subscription_id: sub.id,
+      p_plan: plan,
+      p_status: sub.status,
+      p_current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+      p_cancel_at_period_end: sub.cancel_at_period_end ?? false,
+    }),
   });
 
   if (!res.ok) {
-    console.error("Subscription upsert failed", res.status, await res.text());
+    console.error("Subscription write failed", res.status, await res.text());
+    // Throwing puts us in the caller's catch, which answers 500 and asks Stripe
+    // to retry — correct for a transient database failure.
+    throw new Error(`apply_subscription_event returned ${res.status}`);
   }
 }
 
@@ -254,6 +279,7 @@ export async function handleWebhook(request: Request, env: BillingEnv): Promise<
         const sub = await retrieveSubscription(env.STRIPE_SECRET_KEY, session.subscription);
         await upsertSubscription(
           env,
+          event,
           sub,
           session.metadata?.["user_id"] ?? session.client_reference_id ?? undefined,
         );
@@ -265,7 +291,7 @@ export async function handleWebhook(request: Request, env: BillingEnv): Promise<
         // `deleted` still carries the object with status "canceled", which is
         // what we want recorded — the row stays for history and the gate closes
         // because the status is no longer entitling.
-        await upsertSubscription(env, event.data.object as unknown as StripeSubscription);
+        await upsertSubscription(env, event, event.data.object as unknown as StripeSubscription);
         break;
       }
 

@@ -72,10 +72,21 @@ export const mainNav = [
   { label: "About", href: "/about" },
 ] as const;
 
-/** Analytics placeholders — wire real IDs in via environment configuration. */
+/**
+ * Analytics and search-console identifiers.
+ *
+ * These were hardcoded empty strings that nothing read, so the site shipped
+ * with no analytics, no error reporting and no Search Console verification —
+ * there was no way to tell whether any of the SEO work was doing anything.
+ *
+ * Read from build-time variables so switching them on is a deploy, not a code
+ * change. Vite inlines `VITE_*`, so an unset variable becomes "" and the
+ * corresponding tag is simply not rendered. The PostHog and Clarity
+ * placeholders are gone; they named products nothing here integrates with.
+ */
 export const analyticsConfig = {
-  googleAnalyticsId: "" as string,
-  posthogKey: "" as string,
-  clarityId: "" as string,
-  searchConsoleVerification: "" as string,
+  /** e.g. "G-XXXXXXXXXX". Renders the gtag.js snippet when set. */
+  googleAnalyticsId: (import.meta.env["VITE_GA4_ID"] as string | undefined) ?? "",
+  /** The token from Search Console's "HTML tag" verification method. */
+  searchConsoleVerification: (import.meta.env["VITE_GSC_VERIFICATION"] as string | undefined) ?? "",
 };

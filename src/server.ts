@@ -54,14 +54,33 @@ function isH3SwallowedErrorBody(body: string): boolean {
  */
 const SUPABASE_CONNECT_SRC = (() => {
   const raw = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
-  if (!raw) return "";
+  // Not a warning. Without this the policy still looks well-formed but blocks
+  // every auth call and every data read, which presents as an app that loads
+  // and then does nothing — far harder to diagnose than a failed build.
+  if (!raw) {
+    throw new Error(
+      "VITE_SUPABASE_URL is not set at build time. The Content-Security-Policy " +
+        "is derived from it, and without it the deployed app cannot reach Supabase at all.",
+    );
+  }
   try {
     const { origin } = new URL(raw);
     return `${origin} ${origin.replace(/^https:/, "wss:")}`;
   } catch {
-    return "";
+    throw new Error(`VITE_SUPABASE_URL is not a valid URL: ${JSON.stringify(raw)}`);
   }
 })();
+
+/**
+ * Google Analytics origins, added to the policy only when a measurement id was
+ * configured at build time. Listing them unconditionally would widen the policy
+ * for every deploy, including the ones with no analytics at all.
+ */
+const GA_ENABLED = Boolean(import.meta.env["VITE_GA4_ID"]);
+const GA_SCRIPT_SRC = GA_ENABLED ? " https://www.googletagmanager.com" : "";
+const GA_CONNECT_SRC = GA_ENABLED
+  ? " https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com"
+  : "";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -74,7 +93,12 @@ const SECURITY_HEADERS: Record<string, string> = {
     "default-src 'self'",
     // Cloudflare injects its analytics beacon into the response; without this
     // the browser blocks it and logs a CSP violation on every page load.
-    "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
+    // 'unsafe-inline' is load-bearing here and cannot currently be removed:
+    // TanStack Start emits a per-request inline hydration script (~13KB of
+    // router state), so its hash changes on every response and a hash-based
+    // policy is impossible. A nonce would work, but the framework provides no
+    // way to stamp one onto the script it injects. Revisit if that changes.
+    `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com${GA_SCRIPT_SRC}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https:",
     "font-src 'self' data: https://fonts.gstatic.com",
@@ -83,7 +107,7 @@ const SECURITY_HEADERS: Record<string, string> = {
     // Derived from the configured URL rather than hardcoded, so it cannot
     // drift out of step with VITE_SUPABASE_URL, and scoped to that one project
     // rather than a *.supabase.co wildcard.
-    `connect-src 'self' ${SUPABASE_CONNECT_SRC} https://cloudflareinsights.com`,
+    `connect-src 'self' ${SUPABASE_CONNECT_SRC} https://cloudflareinsights.com${GA_CONNECT_SRC}`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     // Stripe Checkout is a top-level redirect, not a form post, so it needs no

@@ -42,7 +42,7 @@ const PRO_FEATURES = [
 
 export function BillingPanel() {
   const { subscription, loading, entitled, plan } = useSubscription();
-  const { settling } = useCheckoutReturn();
+  const { settling, timedOut } = useCheckoutReturn();
   const [interval, setInterval] = useState<Interval>("year");
   const [pending, setPending] = useState(false);
   const [busy, setBusy] = useState<"cancel" | "resume" | "portal" | null>(null);
@@ -131,6 +131,14 @@ export function BillingPanel() {
             {settling && (
               <p role="status" className="mt-3 text-sm text-muted-foreground">
                 Payment received — activating your subscription. This usually takes a few seconds.
+              </p>
+            )}
+
+            {timedOut && !entitled && (
+              <p role="status" className="mt-3 text-sm text-muted-foreground">
+                Your payment went through, but the subscription has not activated yet. Nothing
+                further is needed from you — reload in a minute, and if it still has not appeared,
+                contact support and we will sort it out.
               </p>
             )}
 

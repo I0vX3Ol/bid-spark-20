@@ -68,18 +68,29 @@ function toOpportunity(row: OpportunityRow): Opportunity {
   };
 }
 
-let cache: { records: Opportunity[]; fetchedAt: number } | null = null;
+/**
+ * Cache of the public opportunity list.
+ *
+ * On the server this module lives for the lifetime of a Worker isolate, so this
+ * is shared across every request that isolate serves. That is only safe because
+ * `govscout_opportunities` is public — RLS grants `select` on it to everyone,
+ * so there are no per-caller rows to leak. **Nothing user-scoped may be cached
+ * here.** The per-user readers below deliberately query on every call.
+ */
+let publicOpportunityCache: { records: Opportunity[]; fetchedAt: number } | null = null;
 const CACHE_TTL_MS = 60_000;
 
 /**
- * Fetch live opportunities from Supabase. Falls back to the bundled sample
- * dataset if the request fails or returns nothing (e.g. missing env vars in
- * a local dev environment, or a transient network error) so the search page
- * never renders empty.
+ * Fetch live opportunities from Supabase.
+ *
+ * Returns an empty list if the query fails, and the caller renders an empty
+ * state. It does not substitute sample data: showing invented contract
+ * opportunities to somebody deciding what to bid on would be worse than showing
+ * them nothing.
  */
 export async function fetchOpportunities(): Promise<Opportunity[]> {
-  if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS) {
-    return cache.records;
+  if (publicOpportunityCache && Date.now() - publicOpportunityCache.fetchedAt < CACHE_TTL_MS) {
+    return publicOpportunityCache.records;
   }
   const { data, error } = await supabase
     .from("govscout_opportunities")
@@ -93,7 +104,7 @@ export async function fetchOpportunities(): Promise<Opportunity[]> {
   if (!data || data.length === 0) return [];
 
   const records = (data as OpportunityRow[]).map(toOpportunity);
-  cache = { records, fetchedAt: Date.now() };
+  publicOpportunityCache = { records, fetchedAt: Date.now() };
   return records;
 }
 
@@ -191,7 +202,25 @@ export type GovProfile = {
 };
 
 export async function fetchProfile(): Promise<GovProfile | null> {
-  const { data, error } = await supabase.from("govscout_profiles").select("*").maybeSingle();
+  const { data: me } = await supabase.auth.getUser();
+  if (!me.user) return null;
+
+  // Filtered explicitly as well as by RLS. RLS is what enforces this, but a
+  // reader that says which row it wants cannot silently start returning
+  // somebody else's if a policy is ever loosened.
+  let row = await supabase.from("govscout_profiles").select("*").eq("id", me.user.id).maybeSingle();
+
+  // Profiles are created by the on_auth_user_created trigger, which keys off
+  // the `app` value in the signup metadata. A user who arrived without it —
+  // an OAuth flow, an invite, a hand-created account — ends up with no row at
+  // all and a settings page that silently shows nothing. Create it on demand;
+  // `profiles: insert own` allows exactly this and nothing more.
+  if (!row.error && !row.data) {
+    await supabase.from("govscout_profiles").insert({ id: me.user.id, email: me.user.email ?? "" });
+    row = await supabase.from("govscout_profiles").select("*").eq("id", me.user.id).maybeSingle();
+  }
+
+  const { data, error } = row;
   if (error || !data) return null;
   const r = data as GsRow;
   return {
@@ -207,10 +236,42 @@ export async function fetchProfile(): Promise<GovProfile | null> {
   };
 }
 
-export async function updateProfile(patch: Record<string, unknown>) {
+/**
+ * Columns a user may change on their own profile.
+ *
+ * `plan` is deliberately absent. RLS lets someone update any column of their
+ * own row, so an unrestricted patch let the client set its own plan. Nothing
+ * gates on `profiles.plan` today — entitlement is read from
+ * `govscout_subscriptions`, which only the Stripe webhook's service role can
+ * write — but a whitelist here means that stays true even if some later screen
+ * starts trusting it. `id` and `email` are owned by auth, not by this form.
+ */
+const EDITABLE_PROFILE_COLUMNS = [
+  "full_name",
+  "company",
+  "naics_codes",
+  "set_asides",
+  "states",
+  "notification_prefs",
+] as const;
+
+export type ProfilePatch = Partial<Record<(typeof EDITABLE_PROFILE_COLUMNS)[number], unknown>>;
+
+export async function updateProfile(patch: ProfilePatch) {
   const { data: me } = await supabase.auth.getUser();
   if (!me.user) throw new Error("You need to be signed in.");
-  const { error } = await supabase.from("govscout_profiles").update(patch).eq("id", me.user.id);
+
+  // Filtered at runtime, not just in the type — the type is erased at build and
+  // this is the part that actually holds.
+  const safe = Object.fromEntries(
+    Object.entries(patch).filter(([column]) =>
+      (EDITABLE_PROFILE_COLUMNS as readonly string[]).includes(column),
+    ),
+  );
+
+  if (Object.keys(safe).length === 0) return;
+
+  const { error } = await supabase.from("govscout_profiles").update(safe).eq("id", me.user.id);
   if (error) throw error;
 }
 

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
@@ -136,15 +136,20 @@ export async function openBillingPortal(): Promise<void> {
  * sees "no subscription" straight after paying and reasonably concludes the
  * payment failed. Polls briefly until the subscription appears, then stops.
  */
-export function useCheckoutReturn(): { settling: boolean } {
+export function useCheckoutReturn(): { settling: boolean; timedOut: boolean } {
   const queryClient = useQueryClient();
   const { subscription, entitled } = useSubscription();
+  const [timedOut, setTimedOut] = useState(false);
 
   const isReturn =
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("checkout") === "success";
 
-  const settling = isReturn && !entitled;
+  // Stops claiming to be "activating" once polling has given up. Previously
+  // this was `isReturn && !entitled`, which stayed true forever when the
+  // webhook never landed — the customer sat on "activating your subscription"
+  // indefinitely with nothing telling them to do anything about it.
+  const settling = isReturn && !entitled && !timedOut;
 
   useEffect(() => {
     if (!isReturn || entitled) return;
@@ -155,11 +160,14 @@ export function useCheckoutReturn(): { settling: boolean } {
       void queryClient.invalidateQueries({ queryKey: ["subscription"] });
       // ~20s is comfortably longer than a healthy webhook round trip; past that
       // something is wrong and polling forever would just spin.
-      if (attempts >= 10) window.clearInterval(timer);
+      if (attempts >= 10) {
+        window.clearInterval(timer);
+        setTimedOut(true);
+      }
     }, 2000);
 
     return () => window.clearInterval(timer);
   }, [isReturn, entitled, subscription, queryClient]);
 
-  return { settling };
+  return { settling, timedOut };
 }
