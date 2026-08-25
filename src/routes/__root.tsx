@@ -10,12 +10,12 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportError } from "../lib/report-error";
 import { ThemeProvider, themeInitScript } from "@/lib/theme";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Toaster } from "@/components/ui/sonner";
-import { siteConfig } from "@/config/site";
+import { analyticsConfig, siteConfig } from "@/config/site";
 import { AuthProvider } from "@/lib/auth";
 
 function NotFoundComponent() {
@@ -44,7 +44,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
@@ -91,6 +91,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: siteConfig.name },
       { name: "twitter:card", content: "summary_large_image" },
+      // Rendered only when configured. Search Console's HTML-tag method looks
+      // for this exact name on the homepage.
+      ...(analyticsConfig.searchConsoleVerification
+        ? [
+            {
+              name: "google-site-verification",
+              content: analyticsConfig.searchConsoleVerification,
+            },
+          ]
+        : []),
     ],
     links: [
       {
@@ -107,7 +117,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
       { rel: "icon", href: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+      // Warms the connection before the tag loads; skipped entirely when GA is
+      // not configured so an unused origin is not preconnected.
+      ...(analyticsConfig.googleAnalyticsId
+        ? [{ rel: "preconnect", href: "https://www.googletagmanager.com" }]
+        : []),
     ],
+    scripts: analyticsConfig.googleAnalyticsId
+      ? [
+          {
+            src: `https://www.googletagmanager.com/gtag/js?id=${analyticsConfig.googleAnalyticsId}`,
+            async: true,
+          },
+          {
+            children:
+              "window.dataLayer=window.dataLayer||[];" +
+              "function gtag(){dataLayer.push(arguments)}" +
+              "gtag('js',new Date());" +
+              `gtag('config','${analyticsConfig.googleAnalyticsId}');`,
+          },
+        ]
+      : [],
   }),
   shellComponent: RootShell,
   component: RootComponent,

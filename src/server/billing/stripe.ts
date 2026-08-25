@@ -231,10 +231,27 @@ export type StripeSubscription = {
   customer: string;
   status: string;
   cancel_at_period_end?: boolean;
+  /** Present up to API version 2025-03-31; moved onto items after it. */
   current_period_end?: number;
-  items?: { data?: Array<{ price?: { id?: string } }> };
+  items?: {
+    data?: Array<{ price?: { id?: string }; current_period_end?: number }>;
+  };
   metadata?: Record<string, string>;
 };
+
+/**
+ * The end of the current paid period, in seconds.
+ *
+ * Stripe moved `current_period_end` off the subscription and onto its items in
+ * API version 2025-03-31. Our outbound calls pin STRIPE_API_VERSION, but
+ * webhook payloads are rendered at whatever version the *endpoint* is
+ * configured for — so a subscription object arriving from a webhook can legally
+ * have it in either place. Reading both means a version change cannot silently
+ * turn the renewal date into null.
+ */
+export function subscriptionPeriodEnd(sub: StripeSubscription): number | undefined {
+  return sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end;
+}
 
 export type StripeCheckoutSessionCompleted = {
   id: string;
@@ -247,6 +264,8 @@ export type StripeCheckoutSessionCompleted = {
 export type StripeEvent = {
   id: string;
   type: string;
+  /** Unix seconds. Used to order events, which Stripe does not deliver in order. */
+  created: number;
   data: { object: Record<string, unknown> };
 };
 

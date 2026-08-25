@@ -39,9 +39,11 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
+      # Blocks on high and critical advisories only. It previously ran with
+      # continue-on-error, which meant a known-vulnerable dependency could ship
+      # and the only trace was a green tick next to red log output.
       - name: Audit dependencies
-        run: bun audit
-        continue-on-error: true
+        run: bun audit --audit-level=high
 
       # Fails the build if a server-side secret ever reaches the browser bundle.
       # Cheap, and it turns "we were careful" into something enforced.
@@ -116,6 +118,9 @@ jobs:
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Only ever used as the `apikey` header when asking Supabase to identify
+          # a bearer token — a call that needs no privilege of its own.
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           STRIPE_PRICE_PROFESSIONAL_MONTHLY: ${{ secrets.STRIPE_PRICE_PROFESSIONAL_MONTHLY }}
           STRIPE_PRICE_PROFESSIONAL_ANNUAL: ${{ secrets.STRIPE_PRICE_PROFESSIONAL_ANNUAL }}
           APP_ORIGIN: https://govscout.nexudel.com
@@ -128,6 +133,7 @@ jobs:
             --arg wh  "$STRIPE_WEBHOOK_SECRET" \
             --arg su  "$SUPABASE_URL" \
             --arg srk "$SUPABASE_SERVICE_ROLE_KEY" \
+            --arg ak  "$SUPABASE_ANON_KEY" \
             --arg pm  "$STRIPE_PRICE_PROFESSIONAL_MONTHLY" \
             --arg pa  "$STRIPE_PRICE_PROFESSIONAL_ANNUAL" \
             --arg org "$APP_ORIGIN" \
@@ -136,6 +142,7 @@ jobs:
                STRIPE_WEBHOOK_SECRET: $wh,
                SUPABASE_URL: $su,
                SUPABASE_SERVICE_ROLE_KEY: $srk,
+               SUPABASE_ANON_KEY: $ak,
                STRIPE_PRICE_PROFESSIONAL_MONTHLY: $pm,
                STRIPE_PRICE_PROFESSIONAL_ANNUAL: $pa,
                APP_ORIGIN: $org

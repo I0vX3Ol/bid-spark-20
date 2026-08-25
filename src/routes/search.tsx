@@ -30,9 +30,18 @@ import {
   type SortKey,
 } from "@/modules/opportunities/types";
 
+/**
+ * Both parameters are optional rather than defaulted.
+ *
+ * A `.default()` makes validateSearch return the key even when the URL omits
+ * it, and the router then rewrites the URL to match — so every visit to
+ * `/search` answered 307 and bounced to `/search?q=&sort=relevance`. That put a
+ * redirect in front of the page listed in the sitemap and in the canonical tag.
+ * Absent stays absent here; the defaults are applied where the values are read.
+ */
 const searchSchema = z.object({
-  q: fallback(z.string(), "").default(""),
-  sort: fallback(z.string(), "relevance").default("relevance"),
+  q: fallback(z.string(), "").optional(),
+  sort: fallback(z.string(), "relevance").optional(),
 });
 
 export const Route = createFileRoute("/search")({
@@ -213,7 +222,9 @@ function FilterPanel({
 }
 
 function SearchPage() {
-  const { q, sort } = Route.useSearch();
+  const { q: rawQ, sort: rawSort } = Route.useSearch();
+  const q = rawQ ?? "";
+  const sort = rawSort ?? "relevance";
   const records = Route.useLoaderData();
   const navigate = useNavigate({ from: "/search" });
   const [filters, setFilters] = useState<OpportunityFilters>({
